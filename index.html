@@ -25,7 +25,7 @@
         if (search.indexOf('?p=') === 0) {
           var decoded = decodeURIComponent(search.slice(3));
           var base = window.location.pathname.split('/').slice(0, 2).join('/');
-          var newPath = base + (decoded ? '/' + decoded : '');
+          var newPath = base + '/' + decoded.replace(/^\//, '');
           window.history.replaceState(null, null, newPath);
         }
       })();

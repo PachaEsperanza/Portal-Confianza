@@ -3,15 +3,15 @@
 <head>
   <meta charset="utf-8">
   <script>
-    // GitHub Pages SPA fix
-    var segmentCount = 1; // 1 = repo name segment (e.g. /Portal-Proveedores)
     var l = window.location;
-    var base = l.pathname.split('/').slice(0, segmentCount + 1).join('/');
-    var path = l.pathname.slice(base.length);
+    var base = l.pathname.split('/').slice(0, 2).join('/');
+    var path = l.pathname.slice(base.length).replace(/^\//, '');
+    var search = l.search ? l.search.slice(1) : '';
+    var query = path + (search ? '&' + search : '');
     l.replace(
-      l.protocol + '//' + l.host + base +
-      '/?p=' + encodeURIComponent(path.slice(1) + l.search) +
-      (l.hash ? l.hash : '')
+      l.protocol + '//' + l.host + base + '/' +
+      '?p=' + encodeURIComponent(query) +
+      (l.hash || '')
     );
   </script>
 </head>
