@@ -3,13 +3,8 @@ import NotFound from "../pages/NotFound";
 import Home from "../pages/home/page";
 import Auth from "../pages/auth/page";
 import DashboardLayout from "../pages/dashboard/layout";
-import Dashboard from "../pages/dashboard/page";
-import Products from "../pages/dashboard/products/page";
-import Orders from "../pages/dashboard/orders/page";
-import NewLot from "../pages/dashboard/new-lot/page";
-import MyLots from "../pages/dashboard/my-lots/page";
-import Payments from "../pages/dashboard/payments/page";
-import Contract from "../pages/dashboard/contract/page";
+import Resumen from "../pages/dashboard/page";
+import Registro from "../pages/dashboard/registro/page";
 import Profile from "../pages/dashboard/profile/page";
 
 const routes: RouteObject[] = [
@@ -25,13 +20,8 @@ const routes: RouteObject[] = [
     path: "/dashboard",
     element: <DashboardLayout />,
     children: [
-      { path: "", element: <Dashboard /> },
-      { path: "products", element: <Products /> },
-      { path: "orders", element: <Orders /> },
-      { path: "new-lot", element: <NewLot /> },
-      { path: "my-lots", element: <MyLots /> },
-      { path: "payments", element: <Payments /> },
-      { path: "contract", element: <Contract /> },
+      { path: "", element: <Resumen /> },
+      { path: "registro", element: <Registro /> },
       { path: "profile", element: <Profile /> },
     ],
   },

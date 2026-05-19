@@ -3,13 +3,8 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 
 const menuItems = [
-  { path: "/dashboard", label: "Resumen", icon: "ri-dashboard-line" },
-  { path: "/dashboard/products", label: "Mis Productos", icon: "ri-shopping-bag-line" },
-  { path: "/dashboard/orders", label: "Órdenes", icon: "ri-file-list-3-line" },
-  { path: "/dashboard/new-lot", label: "Nuevo Lote", icon: "ri-add-circle-line" },
-  { path: "/dashboard/my-lots", label: "Mis Lotes", icon: "ri-archive-line" },
-  { path: "/dashboard/payments", label: "Estado de Pagos", icon: "ri-money-dollar-circle-line" },
-  { path: "/dashboard/contract", label: "Mi Contrato", icon: "ri-article-line" },
+  { path: "/dashboard/registro", label: "Registro", icon: "ri-edit-line" },
+  { path: "/dashboard", label: "Resumen", icon: "ri-file-list-3-line" },
   { path: "/dashboard/profile", label: "Perfil", icon: "ri-user-settings-line" },
 ];
 
