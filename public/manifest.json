@@ -1,7 +1,7 @@
 {
-  "name": "Portal de Proveedores",
+  "name": "Portal Confianza",
   "short_name": "Portal CTE",
-  "description": "Portal exclusivo para proveedores de Comparto tu Esperanza",
+  "description": "Portal Confianza · Comparto tu Esperanza",
   "start_url": ".",
   "display": "standalone",
   "background_color": "#4c0519",
