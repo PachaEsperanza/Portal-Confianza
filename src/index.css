@@ -1,0 +1,134 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --guinda-50:  #fff1f2;
+  --guinda-100: #ffe4e6;
+  --guinda-200: #fecdd3;
+  --guinda-300: #fda4af;
+  --guinda-500: #f43f5e;
+  --guinda-600: #e11d48;
+  --guinda-700: #be123c;
+  --guinda-800: #9f1239;
+  --guinda-900: #881337;
+  --guinda-950: #4c0519;
+  --guinda-deep: #7A1D2E;
+  --guinda-glow: rgba(122, 29, 46, 0.5);
+  --white-bright: #ffffff;
+  --white-soft: #fff8f8;
+}
+
+@layer base {
+  html, body, * {
+    font-family: 'Playfair Display', serif;
+  }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(24px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes fadeInScale {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes shine {
+  0% {
+    transform: translateX(-200%);
+  }
+  100% {
+    transform: translateX(200%);
+  }
+}
+
+@keyframes pulse-glow {
+  0%, 100% {
+    box-shadow: 0 0 16px rgba(122, 29, 46, 0.4), 0 0 32px rgba(122, 29, 46, 0.15);
+  }
+  50% {
+    box-shadow: 0 0 24px rgba(122, 29, 46, 0.6), 0 0 48px rgba(122, 29, 46, 0.25);
+  }
+}
+
+@keyframes authFadeIn {
+  0% {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes cardStagger {
+  0% {
+    opacity: 0;
+    transform: translateY(16px) scale(0.98);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes rowStagger {
+  0% {
+    opacity: 0;
+    transform: translateX(-10px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.animate-fade-in-up {
+  animation: fadeInUp 0.8s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.animate-fade-in-scale {
+  animation: fadeInScale 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.animate-auth-fade-in {
+  animation: authFadeIn 0.4s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.animate-card-stagger {
+  animation: cardStagger 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.animate-row-stagger {
+  animation: rowStagger 0.35s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.delay-100 { animation-delay: 0.1s; }
+.delay-200 { animation-delay: 0.25s; }
+.delay-300 { animation-delay: 0.45s; }
+.delay-400 { animation-delay: 0.65s; }
+.delay-500 { animation-delay: 0.85s; }
+
+.stagger-1 { animation-delay: 0.08s; }
+.stagger-2 { animation-delay: 0.16s; }
+.stagger-3 { animation-delay: 0.24s; }
+.stagger-4 { animation-delay: 0.32s; }
+.stagger-5 { animation-delay: 0.40s; }
+.stagger-6 { animation-delay: 0.48s; }
+.stagger-7 { animation-delay: 0.56s; }
+.stagger-8 { animation-delay: 0.64s; }
