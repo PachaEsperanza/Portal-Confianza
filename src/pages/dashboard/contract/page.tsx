@@ -8,7 +8,7 @@ export default function Contract() {
       <div>
         <h2 className="text-xl font-bold text-rose-100">Mi Contrato</h2>
         <p className="text-sm font-semibold text-rose-200 mt-1">
-          Detalles de su contrato vigente como proveedor
+          Detalles de su contrato vigente
         </p>
       </div>
 
@@ -66,7 +66,7 @@ export default function Contract() {
               <span className="w-6 h-6 flex items-center justify-center bg-rose-800/60 rounded text-rose-50 flex-shrink-0 text-xs font-bold">3</span>
               <div>
                 <p className="text-sm font-bold text-rose-100">Pagos</p>
-                <p className="text-xs font-medium text-rose-200/85 mt-0.5">Los pagos se realizarán dentro de los 15 días hábiles posteriores a la recepción y aprobación del lote. El método de pago será transferencia bancaria a la cuenta designada por el proveedor.</p>
+                <p className="text-xs font-medium text-rose-200/85 mt-0.5">Los pagos se realizarán dentro de los 15 días hábiles posteriores a la recepción y aprobación del lote. El método de pago será transferencia bancaria a la cuenta bancaria designada.</p>
               </div>
             </div>
             <div className="flex items-start gap-3 p-3 bg-black/30 border border-rose-300/25 rounded-md backdrop-blur-sm">

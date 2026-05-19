@@ -72,12 +72,12 @@ export default function Profile() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Supplier Info Card */}
         <div className="bg-black/50 backdrop-blur-md rounded-lg border border-rose-300/40 p-5 space-y-5">
-          <h3 className="text-base font-semibold text-rose-50">Información del Proveedor</h3>
+          <h3 className="text-base font-semibold text-rose-50">Información Personal</h3>
 
           <div className="space-y-4">
             <div>
               <label className="block text-xs font-bold text-rose-700 uppercase tracking-wide mb-1.5">
-                Código de Proveedor
+                Código de Acceso
               </label>
               <div className="flex items-center gap-2 px-4 py-3 bg-black/450 rounded-md border border-rose-300/40">
                 <i className="ri-shield-keyhole-line text-rose-700/70" />

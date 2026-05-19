@@ -69,11 +69,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     confirmPassword: string,
   ): Promise<{ success: boolean; message: string }> {
     if (!supplierExists(supplier_id)) {
-      return { success: false, message: "Código de proveedor no encontrado o inactivo." };
+      return { success: false, message: "Código no encontrado o inactivo." };
     }
 
     if (!isFirstAccess(supplier_id)) {
-      return { success: false, message: "Este proveedor ya tiene una contraseña configurada. Use el acceso normal." };
+      return { success: false, message: "Este código ya tiene una contraseña configurada. Use el acceso normal." };
     }
 
     if (password.length < 6) {
@@ -155,7 +155,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   async function login(supplier_id: string, password: string): Promise<{ success: boolean; message: string }> {
     if (!supplierExists(supplier_id)) {
-      return { success: false, message: "Código de proveedor no encontrado o inactivo." };
+      return { success: false, message: "Código no encontrado o inactivo." };
     }
 
     if (isFirstAccess(supplier_id)) {
@@ -166,7 +166,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const found = users.find((u) => u.supplier_id === supplier_id);
 
     if (!found || found.password !== password) {
-      return { success: false, message: "Código de proveedor o contraseña incorrectos." };
+      return { success: false, message: "Código o contraseña incorrectos." };
     }
 
     const authUser: AuthUser = {

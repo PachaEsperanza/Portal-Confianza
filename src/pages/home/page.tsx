@@ -41,7 +41,7 @@ export default function Home() {
         <div className="flex items-center gap-3">
           <img
             src="https://public.readdy.ai/ai/img_res/c99949a7-105a-4e7e-b54f-999d11a6f167.png"
-            alt="Logo Portal de Proveedores"
+            alt="Logo"
             className="h-10 w-auto"
           />
           <div className="hidden sm:flex flex-col items-start">

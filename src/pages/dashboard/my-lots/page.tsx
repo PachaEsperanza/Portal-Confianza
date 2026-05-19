@@ -43,7 +43,7 @@ export default function MyLots() {
       <div>
         <h2 className="text-xl font-semibold text-rose-50">Mis Lotes</h2>
         <p className="text-sm text-rose-200/70 mt-1">
-          Lotes registrados bajo su código de proveedor
+          Lotes registrados bajo su código
         </p>
       </div>
 

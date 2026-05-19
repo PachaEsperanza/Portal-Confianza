@@ -24,7 +24,7 @@ export default function Orders() {
       <div>
         <h2 className="text-xl font-semibold text-rose-50">Órdenes y Solicitudes</h2>
         <p className="text-sm text-rose-200/70 mt-1">
-          Historial de órdenes asociadas a su proveedor
+          Historial de órdenes asociadas a su cuenta
         </p>
       </div>
 
