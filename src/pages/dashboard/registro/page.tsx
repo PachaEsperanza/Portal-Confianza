@@ -271,9 +271,20 @@ function GPSRows({ rows, onChange }: { rows: FormData["gpsVertices"]; onChange: 
   );
 }
 
+// ─── FOLIO HELPERS ───────────────────────────────────────────────────────────
+function getNextFolio(): string {
+  const count = parseInt(localStorage.getItem("registro_folio_count") || "0", 10) + 1;
+  return String(count).padStart(3, "0");
+}
+function incrementFolio(): string {
+  const count = parseInt(localStorage.getItem("registro_folio_count") || "0", 10) + 1;
+  localStorage.setItem("registro_folio_count", String(count));
+  return String(count).padStart(3, "0");
+}
+
 // ─── MAIN ────────────────────────────────────────────────────────────────────
 export default function Registro() {
-  const [data, setData] = useState<FormData>(init);
+  const [data, setData] = useState<FormData>({ ...init, folio: getNextFolio() });
   const [active, setActive] = useState<SectionId>("identidad");
   const [errors, setErrors] = useState<Partial<Record<keyof FormData, boolean>>>({});
   const [toast, setToast] = useState<string | null>(null);
@@ -356,6 +367,11 @@ export default function Registro() {
       setValidationModal(allMissing);
       return;
     }
+    // Confirmar folio e incrementar contador
+    const confirmedFolio = incrementFolio();
+    const now = new Date();
+    const fechaHora = now.toISOString().split("T")[0] + " " + now.toTimeString().slice(0, 5);
+    setData(d => ({ ...d, folio: confirmedFolio, fecha: fechaHora }));
     setSubmitted(true);
   };
 
@@ -374,7 +390,7 @@ export default function Registro() {
         </div>
         <h2 className="text-2xl font-bold text-stone-800" style={{ fontFamily: "'Playfair Display', serif" }}>¡Registro Enviado!</h2>
         <p className="text-sm text-stone-600 max-w-sm">La ficha del productor fue completada y firmada. Los datos tienen validez de declaración jurada.</p>
-        <button onClick={() => { setData(init); setSubmitted(false); setActive("identidad"); }}
+        <button onClick={() => { setData({ ...init, folio: getNextFolio() }); setSubmitted(false); setActive("identidad"); }}
           className="mt-4 px-6 py-3 rounded-lg text-sm font-bold text-white bg-amber-700 hover:bg-amber-800 transition-all">
           <i className="ri-add-line mr-2" /> Nuevo registro
         </button>
@@ -450,8 +466,15 @@ export default function Registro() {
         </h2>
         <p className="text-xs text-red-600 font-bold mb-4">👉 Completa todos los campos marcados con <span className="text-red-600">*</span> — son obligatorios para enviar el registro.</p>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
+          {/* Folio — solo lectura, autoincremental */}
+          <div>
+            <label className={lbl}>Folio N.°</label>
+            <div className="w-full px-3 py-2.5 bg-amber-100 border-2 border-amber-400 rounded-md text-sm font-black text-amber-900 tracking-widest select-none cursor-not-allowed">
+              #{data.folio}
+            </div>
+            <p className="text-[10px] text-amber-600 mt-1">Asignado al enviar</p>
+          </div>
           {[
-            { label: "Folio N.°", k: "folio" as const, ph: "0001" },
             { label: "Fecha", k: "fecha" as const, type: "date" },
             { label: "Nombre del acopiador", k: "nombreAcopiador" as const, ph: "Nombre completo" },
             { label: "Zona / ruta de acopio", k: "zonaRuta" as const, ph: "Ej. Ruta Quillabamba Norte" },
@@ -490,12 +513,6 @@ export default function Registro() {
           );
         })}
       </div>
-      <div className="text-center">
-        <span className="text-sm font-bold text-amber-800 uppercase tracking-widest">
-          {SECTIONS.find(s => s.id === active)?.num} · {SECTIONS.find(s => s.id === active)?.title}
-        </span>
-      </div>
-
       {/* BODY */}
       <div className={card + " space-y-5"}>
 

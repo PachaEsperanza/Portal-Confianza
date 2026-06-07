@@ -87,7 +87,7 @@ export default function Home() {
                 textShadow: '0 0 40px rgba(232,201,58,0.4)',
               }}
             >
-              Comparto tu Esperanza
+              COMPARTO <em style={{ fontStyle: 'italic', textTransform: 'lowercase', fontSize: '0.72em', fontWeight: 800, letterSpacing: '0.01em', verticalAlign: 'middle' }}>tu</em> ESPERANZA
             </h1>
           </div>
           <p
@@ -99,12 +99,12 @@ export default function Home() {
               fontStyle: 'italic',
               fontSize: 'clamp(1.2rem, 2.8vw, 1.9rem)',
               letterSpacing: '0.04em',
-              textShadow: '0 0 30px rgba(255,255,255,0.9), 0 0 60px rgba(255,255,255,0.5), 0 1px 4px rgba(0,0,0,0.2)',
+              textShadow: '0 1px 6px rgba(0,0,0,0.5)',
             }}
           >
             Bienvenido a esta gran familia
           </p>
-          <p className="animate-fade-in-up delay-300 mt-8 text-lg md:text-xl text-white/75 max-w-lg mx-auto leading-relaxed font-sans font-bold">
+          <p className="animate-fade-in-up delay-300 mt-8 max-w-lg mx-auto leading-relaxed text-white" style={{ fontFamily: 'Arial, sans-serif', fontSize: 'clamp(0.95rem, 2vw, 1.1rem)', fontWeight: 400 }}>
             Ingrese a su página personal para revisar su información de manera segura y privada.
           </p>
           <div className="animate-fade-in-scale delay-400 mt-12">
