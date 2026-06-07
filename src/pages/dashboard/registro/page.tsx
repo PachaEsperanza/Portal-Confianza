@@ -129,7 +129,7 @@ const init: FormData = {
 };
 
 // ─── CREMA STYLE HELPERS ─────────────────────────────────────────────────────
-const card = "bg-amber-50 border border-amber-200 rounded-xl shadow-sm p-5 md:p-6";
+const card = "bg-amber-50 border border-amber-200 rounded-xl shadow-sm p-5 md:p-6 overflow-hidden";
 const inp  = "w-full px-3 py-2.5 bg-white border-2 border-amber-300 rounded-md text-sm font-medium text-stone-800 placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all";
 const inpErr = "w-full px-3 py-2.5 bg-white border-2 border-red-500 rounded-md text-sm font-medium text-stone-800 placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-red-400 transition-all";
 const lbl  = "block text-xs font-bold text-stone-700 uppercase tracking-widest mb-1.5";
@@ -475,15 +475,24 @@ export default function Registro() {
             <p className="text-[10px] text-amber-600 mt-1">Asignado al enviar</p>
           </div>
           {[
-            { label: "Fecha", k: "fecha" as const, type: "date" },
             { label: "Nombre del acopiador", k: "nombreAcopiador" as const, ph: "Nombre completo" },
             { label: "Zona / ruta de acopio", k: "zonaRuta" as const, ph: "Ej. Ruta Quillabamba Norte" },
           ].map(f => (
             <div key={f.k} className="min-w-0">
               <label className={lbl}>{f.label}</label>
-              <input type={f.type || "text"} className={inp + " w-full min-w-0"} placeholder={f.ph} value={String(data[f.k])} onChange={e => upd(f.k, e.target.value)} />
+              <input type="text" className={inp + " w-full min-w-0"} placeholder={f.ph} value={String(data[f.k])} onChange={e => upd(f.k, e.target.value)} />
             </div>
           ))}
+          <div className="min-w-0">
+            <label className={lbl}>Fecha</label>
+            <input
+              type="date"
+              className={inp + " min-w-0"}
+              value={String(data.fecha)}
+              onChange={e => upd("fecha", e.target.value)}
+              style={{ width: '100%', maxWidth: '100%', boxSizing: 'border-box', display: 'block' }}
+            />
+          </div>
         </div>
         <div>
           <div className="flex justify-between mb-1">
