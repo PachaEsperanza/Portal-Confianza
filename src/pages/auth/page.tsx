@@ -153,14 +153,12 @@ export default function Auth() {
           <div className="flex flex-col items-stretch gap-1.5">
             <div className="flex justify-center">
               <span
-                className="inline-block text-center text-[10px] uppercase tracking-[0.12em] leading-none px-3 py-1.5 rounded-full"
+                className="inline-block text-center uppercase tracking-[0.12em] leading-none"
                 style={{
-                  color: '#C9A84C',
-                  background: 'rgba(15,5,3,0.8)',
-                  border: '1px solid rgba(201,168,76,0.5)',
+                  color: '#1a5c2e',
                   fontFamily: "'Playfair Display', serif",
                   fontWeight: 800,
-                  boxShadow: '0 3px 10px rgba(0,0,0,0.35), inset 0 0 0 1px rgba(201,168,76,0.15)',
+                  fontSize: '11px',
                 }}
               >
                 ¿Es tu primer acceso?
@@ -182,14 +180,12 @@ export default function Auth() {
           <div className="flex flex-col items-stretch gap-1.5">
             <div className="flex justify-center">
               <span
-                className="inline-block text-center text-[10px] uppercase tracking-[0.12em] leading-none px-3 py-1.5 rounded-full"
+                className="inline-block text-center uppercase tracking-[0.12em] leading-none"
                 style={{
-                  color: '#C9A84C',
-                  background: 'rgba(15,5,3,0.8)',
-                  border: '1px solid rgba(201,168,76,0.5)',
+                  color: '#1a5c2e',
                   fontFamily: "'Playfair Display', serif",
                   fontWeight: 800,
-                  boxShadow: '0 3px 10px rgba(0,0,0,0.35), inset 0 0 0 1px rgba(201,168,76,0.15)',
+                  fontSize: '11px',
                 }}
               >
                 ¿Ya tienes una cuenta?
