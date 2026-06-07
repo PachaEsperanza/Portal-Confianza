@@ -1,39 +1,22 @@
 import { useNavigate } from "react-router-dom";
-import { useRef, useEffect } from "react";
 
 declare const __BASE_PATH__: string;
 
 export default function Home() {
   const navigate = useNavigate();
-  const videoRef = useRef<HTMLVideoElement>(null);
   const basePath = typeof __BASE_PATH__ !== 'undefined' ? __BASE_PATH__ : '/';
-  const videoSrc = `${basePath}videos/fondos3.mp4`.replace('//', '/');
-
-  useEffect(() => {
-    const video = videoRef.current;
-    if (video) {
-      video.play().catch(() => {});
-    }
-  }, []);
 
   return (
     <div className="relative min-h-screen w-full flex flex-col">
-      {/* Background Video */}
+      {/* Background Image */}
       <div className="absolute inset-0 w-full h-full overflow-hidden">
-        <video
-          ref={videoRef}
-          autoPlay
-          muted
-          loop
-          playsInline
-          preload="auto"
-          className="w-full h-full object-cover"
+        <img
+          src={`${basePath}images/coments.jpg`.replace('//', '/')}
+          alt=""
+          className="w-full h-full object-cover object-center"
           style={{ display: 'block' }}
-        >
-          <source src={videoSrc} type="video/mp4" />
-        </video>
-        <div className="absolute inset-0 -z-10" style={{ background: 'linear-gradient(135deg, #3f0d17 0%, #7A1D2E 40%, #9f1239 70%, #2d0a10 100%)' }} />
-        <div className="absolute inset-0 bg-gradient-to-b from-rose-950/35 via-rose-900/20 to-stone-900/45" />
+        />
+        <div className="absolute inset-0 bg-gradient-to-b from-rose-950/50 via-stone-900/40 to-stone-950/60" />
       </div>
 
       {/* Navbar */}
@@ -91,16 +74,17 @@ export default function Home() {
               }}
             />
             <h1
-              className="uppercase tracking-tight leading-[1.05]"
+              className="uppercase leading-[0.95]"
               style={{
-                color: '#C9A84C',
+                color: '#E8C93A',
                 fontFamily: "'Playfair Display', serif",
                 fontWeight: 950,
                 fontSize: 'clamp(2rem, 5vw, 3.6rem)',
-                letterSpacing: '0.03em',
-                WebkitTextStroke: '0.5px #C9A84C',
-                filter: 'drop-shadow(0 0 18px rgba(201,168,76,0.5)) drop-shadow(0 2px 8px rgba(0,0,0,0.55))',
+                letterSpacing: '-0.01em',
+                WebkitTextStroke: '0.8px #D4AF20',
+                filter: 'drop-shadow(0 0 22px rgba(232,201,58,0.65)) drop-shadow(0 2px 10px rgba(0,0,0,0.7))',
                 margin: 0,
+                textShadow: '0 0 40px rgba(232,201,58,0.4)',
               }}
             >
               Comparto tu Esperanza

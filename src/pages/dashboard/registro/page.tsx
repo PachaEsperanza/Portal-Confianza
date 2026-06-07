@@ -1,5 +1,32 @@
 import { useState, useRef } from "react";
 
+// Etiquetas legibles para los campos obligatorios
+const FIELD_LABELS: Partial<Record<string, string>> = {
+  nombre: "Nombre completo",
+  dni: "DNI",
+  telefono: "Teléfono",
+  comunidad: "Comunidad",
+  distrito: "Distrito",
+  fotoProductor: "Foto del productor",
+  nombreParcela: "Nombre de la parcela",
+  altitud: "Altitud",
+  superficieTotal: "Superficie total",
+  areaCacao: "Área de cacao",
+  fuenteHidrica: "Fuente hídrica",
+  edadPlantas: "Edad de plantas",
+  distanciamiento: "Distanciamiento",
+  gradosBrix: "Grados Brix",
+  estimadoAnual: "Estimado anual",
+  tipoAcopio: "Tipo de acopio",
+  plagaPrincipal: "Plaga principal",
+  pctAfectacionPrincipal: "% Afectación principal",
+  estadoCertificacion: "Estado de certificación",
+  firmaProductor: "Firma del productor",
+  firmaAcopiador: "Firma del acopiador",
+  declaracionJurada: "Declaración jurada (debe aceptarse)",
+  viasTrocha: "Al menos una vía de acceso",
+};
+
 type SectionId = "identidad" | "parcela" | "cultivo" | "produccion" | "sanidad" | "certificacion" | "capacitacion" | "evaluacion" | "firmas";
 
 interface FormData {
@@ -251,6 +278,7 @@ export default function Registro() {
   const [errors, setErrors] = useState<Partial<Record<keyof FormData, boolean>>>({});
   const [toast, setToast] = useState<string | null>(null);
   const [submitted, setSubmitted] = useState(false);
+  const [validationModal, setValidationModal] = useState<{ section: string; num: string; id: SectionId; fields: string[] }[] | null>(null);
 
   const upd = <K extends keyof FormData>(k: K, v: FormData[K]) => {
     setData(d => ({ ...d, [k]: v }));
@@ -280,13 +308,6 @@ export default function Registro() {
   };
 
   const goTo = (nextId: SectionId) => {
-    const curIdx = SECTIONS.findIndex(s => s.id === active);
-    const nextIdx = SECTIONS.findIndex(s => s.id === nextId);
-    if (nextIdx > curIdx && !validateSection(active)) {
-      const sec = SECTIONS.find(s => s.id === active)!;
-      showToast(`⚠️ Faltan campos obligatorios en la sección "${sec.title}". Por favor, completa todos los campos marcados con * antes de continuar.`);
-      return;
-    }
     setActive(nextId);
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
@@ -302,13 +323,38 @@ export default function Registro() {
   };
 
   const handleSubmit = () => {
+    // Recopilar TODOS los errores de TODAS las secciones
+    const allMissing: { section: string; num: string; id: SectionId; fields: string[] }[] = [];
+    const allNewErrors: Partial<Record<keyof FormData, boolean>> = {};
+
     for (const sec of SECTIONS) {
-      if (!validateSection(sec.id)) {
-        setActive(sec.id);
-        showToast(`⚠️ Faltan datos obligatorios en la sección "${sec.title}" (${sec.num}). Revísala y completa los campos marcados con *.`);
-        window.scrollTo({ top: 0, behavior: "smooth" });
-        return;
+      const missingFields: string[] = [];
+      for (const field of sec.required) {
+        const val = data[field];
+        const empty = typeof val === "boolean" ? !val : !String(val).trim();
+        if (empty) {
+          allNewErrors[field] = true;
+          missingFields.push(FIELD_LABELS[field] || String(field));
+        }
       }
+      // Validación especial de vías en parcela
+      if (sec.id === "parcela") {
+        const hasVia = data.viasTrocha || data.viasAfirmada || data.viasAsfaltado || data.viasHerradura || data.viasFluvial || data.viasPie;
+        if (!hasVia) {
+          allNewErrors["viasTrocha"] = true;
+          missingFields.push(FIELD_LABELS["viasTrocha"] || "Vía de acceso");
+        }
+      }
+      if (missingFields.length > 0) {
+        allMissing.push({ section: sec.title, num: sec.num, id: sec.id, fields: missingFields });
+      }
+    }
+
+    setErrors(e => ({ ...e, ...allNewErrors }));
+
+    if (allMissing.length > 0) {
+      setValidationModal(allMissing);
+      return;
     }
     setSubmitted(true);
   };
@@ -339,6 +385,62 @@ export default function Registro() {
   return (
     <div className="space-y-4 pb-8">
       {toast && <Toast msg={toast} onClose={() => setToast(null)} />}
+
+      {/* MODAL DE VALIDACIÓN — muestra todos los campos faltantes */}
+      {validationModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: 'rgba(0,0,0,0.65)' }}>
+          <div className="bg-white rounded-2xl shadow-2xl max-w-lg w-full max-h-[85vh] flex flex-col border-4 border-red-500">
+            {/* Header */}
+            <div className="flex items-center gap-3 bg-red-600 text-white px-6 py-4 rounded-t-xl">
+              <i className="ri-error-warning-fill text-2xl flex-shrink-0" />
+              <div className="flex-1">
+                <p className="font-black text-base uppercase tracking-wide leading-tight">No se puede enviar el registro</p>
+                <p className="text-sm text-red-100 mt-0.5">Faltan {validationModal.reduce((a, s) => a + s.fields.length, 0)} campo(s) obligatorio(s) en {validationModal.length} sección(es)</p>
+              </div>
+              <button onClick={() => setValidationModal(null)} className="text-white/70 hover:text-white text-2xl leading-none cursor-pointer ml-2">✕</button>
+            </div>
+            {/* Body */}
+            <div className="overflow-y-auto flex-1 px-6 py-4 space-y-4">
+              {validationModal.map(sec => (
+                <div key={sec.id} className="border-2 border-amber-300 rounded-xl overflow-hidden">
+                  <div className="bg-amber-100 px-4 py-2 flex items-center gap-2">
+                    <span className="text-xs font-black text-amber-800 bg-amber-700 text-white rounded-full px-2 py-0.5">{sec.num}</span>
+                    <span className="text-sm font-bold text-amber-900">{sec.section}</span>
+                  </div>
+                  <ul className="px-4 py-3 space-y-1.5">
+                    {sec.fields.map((f, i) => (
+                      <li key={i} className="flex items-center gap-2 text-sm text-stone-700">
+                        <span className="w-2 h-2 rounded-full bg-red-500 flex-shrink-0" />
+                        {f}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ))}
+            </div>
+            {/* Footer */}
+            <div className="px-6 py-4 border-t border-stone-200 flex gap-3">
+              <button
+                onClick={() => {
+                  const first = validationModal[0];
+                  setActive(first.id);
+                  setValidationModal(null);
+                  window.scrollTo({ top: 0, behavior: "smooth" });
+                }}
+                className="flex-1 py-2.5 rounded-lg text-sm font-bold text-white bg-amber-700 hover:bg-amber-800 transition-all cursor-pointer"
+              >
+                <i className="ri-arrow-go-back-line mr-1" /> Ir a la primera sección con errores
+              </button>
+              <button
+                onClick={() => setValidationModal(null)}
+                className="px-4 py-2.5 rounded-lg text-sm font-bold text-stone-600 bg-stone-100 hover:bg-stone-200 transition-all cursor-pointer"
+              >
+                Cerrar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* PORTADA */}
       <div className={card}>
