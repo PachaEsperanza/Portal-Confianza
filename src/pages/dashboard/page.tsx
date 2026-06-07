@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import type { ReactNode } from "react";
 import { Link } from "react-router-dom";
 
 interface FormData {
@@ -28,22 +29,26 @@ const tituloMap: Record<string, string> = {
   tramite: "En trámite",
 };
 
+// ─── CREMA STYLE (igual que Registro) ────────────────────────────────────────
+const card = "bg-amber-50 border border-amber-200 rounded-xl shadow-sm p-5 md:p-6";
+const lbl  = "block text-xs font-bold text-stone-700 uppercase tracking-widest mb-1";
+
 const Field = ({ label, value }: { label: string; value: string }) => (
-  <div className="flex flex-col gap-1 p-3 rounded-lg bg-black/35 border border-rose-300/20">
-    <span className="text-[10px] font-bold uppercase tracking-wide text-rose-300">{label}</span>
-    <span className="text-sm font-semibold text-rose-50 break-words">
-      {value && value.trim() ? value : <span className="text-rose-200/40 italic">— sin datos —</span>}
+  <div className="flex flex-col gap-1 p-3 rounded-lg bg-white border border-amber-200">
+    <span className="text-[10px] font-bold uppercase tracking-wide text-amber-700">{label}</span>
+    <span className="text-sm font-semibold text-stone-800 break-words">
+      {value && value.trim() ? value : <span className="text-stone-400 italic">— sin datos —</span>}
     </span>
   </div>
 );
 
-const SectionCard = ({ title, icon, children }: { title: string; icon: string; children: React.ReactNode }) => (
-  <div className="rounded-xl bg-black/50 backdrop-blur-md border border-rose-300/30 p-5 md:p-6">
+const SectionCard = ({ title, icon, children }: { title: string; icon: string; children: ReactNode }) => (
+  <div className={card}>
     <div className="flex items-center gap-3 mb-4">
-      <span className="inline-flex items-center justify-center w-10 h-10 rounded-full" style={{ background: 'linear-gradient(135deg, #3F0D17 0%, #7A1D2E 50%, #3F0D17 100%)', border: '1px solid rgba(201,168,76,0.5)' }}>
-        <i className={`${icon} text-base`} style={{ color: '#C9A84C' }} />
+      <span className="inline-flex items-center justify-center w-9 h-9 rounded-full bg-amber-700">
+        <i className={`${icon} text-base text-white`} />
       </span>
-      <h3 className="text-base md:text-lg font-bold text-rose-50" style={{ fontFamily: "'Playfair Display', serif" }}>
+      <h3 className="text-base md:text-lg font-bold text-stone-800" style={{ fontFamily: "'Playfair Display', serif" }}>
         {title}
       </h3>
     </div>
@@ -73,42 +78,37 @@ export default function Resumen() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="rounded-xl bg-black/45 backdrop-blur-md border border-rose-300/30 p-6 md:p-7">
-        <p className="text-xs font-bold text-rose-300 uppercase tracking-[0.25em] mb-2">Resumen</p>
-        <h2 className="text-2xl md:text-3xl font-bold text-rose-50" style={{ fontFamily: "'Playfair Display', serif", letterSpacing: '0.02em' }}>
+      <div className={card}>
+        <p className="text-xs font-bold text-amber-700 uppercase tracking-[0.25em] mb-2">Resumen</p>
+        <h2 className="text-2xl md:text-3xl font-bold text-stone-800" style={{ fontFamily: "'Playfair Display', serif", letterSpacing: '0.02em' }}>
           {data.nombre || "Información del Registro"}
         </h2>
-        <p className="text-sm font-semibold text-rose-100/85 mt-2">
+        <p className="text-sm font-semibold text-stone-600 mt-2">
           Consolidado de la ficha de registro de la gran familia.
         </p>
 
         {/* Progress */}
         <div className="mt-5">
           <div className="flex items-center justify-between mb-1.5">
-            <span className="text-xs font-bold text-rose-200 uppercase tracking-wide">Completitud</span>
-            <span className="text-xs font-bold text-rose-100">{completitud}% — {filledFields}/{totalFields} campos</span>
+            <span className="text-xs font-bold text-stone-600 uppercase tracking-wide">Completitud</span>
+            <span className="text-xs font-bold text-amber-700">{completitud}% — {filledFields}/{totalFields} campos</span>
           </div>
-          <div className="h-1.5 rounded-full bg-black/40 overflow-hidden">
-            <div className="h-full rounded-full transition-all duration-500" style={{ width: `${completitud}%`, background: 'linear-gradient(90deg, #C9A84C 0%, #F0D38A 50%, #C9A84C 100%)' }} />
+          <div className="h-2.5 rounded-full bg-amber-100 border border-amber-200 overflow-hidden">
+            <div className="h-full rounded-full transition-all duration-500" style={{ width: `${completitud}%`, background: 'linear-gradient(90deg,#92400e,#d97706,#92400e)' }} />
           </div>
         </div>
       </div>
 
       {noTieneDatos ? (
-        <div className="rounded-xl bg-black/45 backdrop-blur-md border border-rose-300/30 p-8 md:p-10 text-center">
-          <i className="ri-file-list-3-line text-5xl text-rose-300/60" />
-          <p className="text-base font-bold text-rose-50 mt-4">Aún no hay datos registrados</p>
-          <p className="text-sm font-semibold text-rose-200/80 mt-2 mb-5">
-            Complete la ficha en la sección <strong className="text-rose-100">Registro</strong> y vuelva aquí para ver el resumen.
+        <div className={card + " text-center"}>
+          <i className="ri-file-list-3-line text-5xl text-amber-400" />
+          <p className="text-base font-bold text-stone-800 mt-4">Aún no hay datos registrados</p>
+          <p className="text-sm font-semibold text-stone-600 mt-2 mb-5">
+            Complete la ficha en la sección <strong className="text-amber-700">Registro</strong> y vuelva aquí para ver el resumen.
           </p>
           <Link
             to="/dashboard/registro"
-            className="inline-flex items-center gap-2 px-6 py-3 rounded-md text-sm font-bold cursor-pointer transition-all hover:scale-[1.02]"
-            style={{
-              background: 'linear-gradient(135deg, #3F0D17 0%, #7A1D2E 50%, #3F0D17 100%)',
-              color: '#fff8f0',
-              border: '1px solid rgba(201,168,76,0.55)',
-            }}
+            className="inline-flex items-center gap-2 px-6 py-3 rounded-md text-sm font-bold cursor-pointer transition-all hover:scale-[1.02] text-white bg-amber-700 hover:bg-amber-800"
           >
             <i className="ri-edit-line" /> Ir a Registro
           </Link>
@@ -117,14 +117,14 @@ export default function Resumen() {
         <>
           {/* Foto + datos principales */}
           {data.fotoProductor && (
-            <div className="rounded-xl bg-black/50 backdrop-blur-md border border-rose-300/30 p-5 md:p-6 flex flex-col md:flex-row items-center gap-5">
-              <img src={data.fotoProductor} alt={data.nombre} className="w-28 h-28 rounded-full object-cover" style={{ border: '3px solid rgba(201,168,76,0.65)', boxShadow: '0 0 18px rgba(201,168,76,0.35)' }} />
+            <div className={card + " flex flex-col md:flex-row items-center gap-5"}>
+              <img src={data.fotoProductor} alt={data.nombre} className="w-28 h-28 rounded-full object-cover" style={{ border: '3px solid #d97706', boxShadow: '0 0 18px rgba(217,119,6,0.3)' }} />
               <div className="text-center md:text-left flex-1">
-                <p className="text-xs font-bold uppercase tracking-widest text-rose-300">Pilar de Nuestra Familia</p>
-                <p className="text-xl md:text-2xl font-bold text-rose-50 mt-1" style={{ fontFamily: "'Playfair Display', serif" }}>
+                <p className="text-xs font-bold uppercase tracking-widest text-amber-700">Pilar de Nuestra Familia</p>
+                <p className="text-xl md:text-2xl font-bold text-stone-800 mt-1" style={{ fontFamily: "'Playfair Display', serif" }}>
                   {data.nombre || "—"}
                 </p>
-                <p className="text-sm font-semibold text-rose-200 mt-1">
+                <p className="text-sm font-semibold text-stone-600 mt-1">
                   {data.sector && <span><i className="ri-map-pin-line mr-1" />{data.sector}</span>}
                 </p>
               </div>
@@ -178,12 +178,7 @@ export default function Resumen() {
           {/* Botón editar */}
           <Link
             to="/dashboard/registro"
-            className="inline-flex items-center gap-2 px-5 py-3 rounded-md text-sm font-bold cursor-pointer transition-all hover:scale-[1.02]"
-            style={{
-              background: 'linear-gradient(135deg, #3F0D17 0%, #7A1D2E 50%, #3F0D17 100%)',
-              color: '#fff8f0',
-              border: '1px solid rgba(201,168,76,0.55)',
-            }}
+            className="inline-flex items-center gap-2 px-5 py-3 rounded-md text-sm font-bold cursor-pointer transition-all hover:scale-[1.02] text-white bg-amber-700 hover:bg-amber-800"
           >
             <i className="ri-edit-line" /> Editar registro
           </Link>

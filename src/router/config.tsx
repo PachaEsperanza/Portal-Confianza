@@ -20,7 +20,8 @@ const routes: RouteObject[] = [
     path: "/dashboard",
     element: <DashboardLayout />,
     children: [
-      { path: "", element: <Resumen /> },
+      { path: "", element: <Registro /> },
+      { path: "resumen", element: <Resumen /> },
       { path: "registro", element: <Registro /> },
       { path: "profile", element: <Profile /> },
     ],
