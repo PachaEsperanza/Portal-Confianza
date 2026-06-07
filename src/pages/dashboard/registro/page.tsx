@@ -465,7 +465,7 @@ export default function Registro() {
           FICHA DE REGISTRO: NUESTRA GRAN FAMILIA
         </h2>
         <p className="text-xs text-red-600 font-bold mb-4">👉 Completa todos los campos marcados con <span className="text-red-600">*</span> — son obligatorios para enviar el registro.</p>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 mb-4">
           {/* Folio — solo lectura, autoincremental */}
           <div>
             <label className={lbl}>Folio N.°</label>
@@ -479,9 +479,9 @@ export default function Registro() {
             { label: "Nombre del acopiador", k: "nombreAcopiador" as const, ph: "Nombre completo" },
             { label: "Zona / ruta de acopio", k: "zonaRuta" as const, ph: "Ej. Ruta Quillabamba Norte" },
           ].map(f => (
-            <div key={f.k}>
+            <div key={f.k} className="min-w-0">
               <label className={lbl}>{f.label}</label>
-              <input type={f.type || "text"} className={inp} placeholder={f.ph} value={String(data[f.k])} onChange={e => upd(f.k, e.target.value)} />
+              <input type={f.type || "text"} className={inp + " w-full min-w-0"} placeholder={f.ph} value={String(data[f.k])} onChange={e => upd(f.k, e.target.value)} />
             </div>
           ))}
         </div>

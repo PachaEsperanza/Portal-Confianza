@@ -18,7 +18,7 @@ export default function DashboardSidebar() {
   return (
     <>
       {/* Mobile hamburger */}
-      <div className="lg:hidden fixed top-0 left-0 right-0 z-50 bg-black/55 backdrop-blur-md border-b border-rose-300/40 px-4 py-3 flex items-center justify-between">
+      <div className="lg:hidden fixed top-0 left-0 right-0 z-[70] bg-black/55 backdrop-blur-md border-b border-rose-300/40 px-4 py-3 flex items-center justify-between">
         <div className="flex items-center gap-2">
           <img
             src="https://public.readdy.ai/ai/img_res/c99949a7-105a-4e7e-b54f-999d11a6f167.png"
@@ -143,7 +143,7 @@ export default function DashboardSidebar() {
 
       {/* Mobile overlay */}
       {mobileOpen && (
-        <div className="lg:hidden fixed inset-0 z-[60] bg-black/50" onClick={() => setMobileOpen(false)}>
+        <div className="lg:hidden fixed inset-0 z-[80] bg-black/50" onClick={() => setMobileOpen(false)}>
           <div
             className="absolute left-0 top-0 bottom-0 w-72 bg-black/65 backdrop-blur-lg shadow-xl flex flex-col"
             onClick={(e) => e.stopPropagation()}
