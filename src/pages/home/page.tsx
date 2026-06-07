@@ -16,7 +16,7 @@ export default function Home() {
           className="w-full h-full object-cover object-center"
           style={{ display: 'block' }}
         />
-        <div className="absolute inset-0 bg-gradient-to-b from-rose-950/50 via-stone-900/40 to-stone-950/60" />
+        <div className="absolute inset-0 bg-gradient-to-b from-rose-950/25 via-stone-900/20 to-stone-950/35" />
       </div>
 
       {/* Navbar */}

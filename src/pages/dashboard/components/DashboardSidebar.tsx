@@ -4,7 +4,6 @@ import { useAuth } from "@/hooks/useAuth";
 
 const menuItems = [
   { path: "/dashboard/registro", label: "Registro", icon: "ri-edit-line" },
-  { path: "/dashboard/resumen", label: "Resumen", icon: "ri-file-list-3-line" },
   { path: "/dashboard/profile", label: "Perfil", icon: "ri-user-settings-line" },
 ];
 
