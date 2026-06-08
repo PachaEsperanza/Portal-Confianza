@@ -5,6 +5,7 @@ interface AuthUser {
   supplier_id: string;
   name: string;
   category: string;
+  isAdmin?: boolean;
 }
 
 interface AuthContextType {
@@ -14,6 +15,7 @@ interface AuthContextType {
   registerFirstAccess: (supplier_id: string, password: string, confirmPassword: string) => Promise<{ success: boolean; message: string }>;
   registerNewSupplier: (name: string, category: string, password: string, confirmPassword: string) => Promise<{ success: boolean; message: string; supplier_id?: string }>;
   logout: () => void;
+  loginAdmin: (password: string) => { success: boolean; message: string };
   isFirstAccess: (supplier_id: string) => boolean;
   supplierExists: (supplier_id: string) => boolean;
 }
@@ -185,9 +187,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(null);
   }
 
+  const ADMIN_PASSWORD = "ConfianzaAdmin2025";
+
+  function loginAdmin(password: string): { success: boolean; message: string } {
+    if (password === ADMIN_PASSWORD) {
+      const adminUser = { supplier_id: "ADMIN", name: "Administrador", category: "admin", isAdmin: true };
+      setUser(adminUser);
+      localStorage.setItem(SESSION_KEY, JSON.stringify(adminUser));
+      return { success: true, message: "Bienvenido, Administrador" };
+    }
+    return { success: false, message: "Contraseña de administrador incorrecta" };
+  }
+
   return (
     <AuthContext.Provider
-      value={{ user, isLoading, login, registerFirstAccess, registerNewSupplier, logout, isFirstAccess, supplierExists }}
+      value={{ user, isLoading, login, registerFirstAccess, registerNewSupplier, logout, isFirstAccess, supplierExists, loginAdmin }}
     >
       {children}
     </AuthContext.Provider>

@@ -674,7 +674,7 @@ export default function Registro() {
 
       {/* PORTADA */}
       <div className={card}>
-        <p className="font-bold text-amber-800 mb-1" style={{ fontFamily: "Calibri, 'Calibri', sans-serif", fontSize: "1.05rem", letterSpacing: "0.08em", textTransform: "uppercase" }}>Cacao Chuncho Orgánico</p>
+        <p className="font-bold text-amber-800 mb-1" style={{ fontFamily: "Calibri, 'Calibri', sans-serif", fontSize: "1.15rem", letterSpacing: "0.08em", textTransform: "uppercase" }}>Cacao Chuncho Orgánico</p>
         <h2 className="text-2xl md:text-3xl font-bold text-stone-800 mb-1" style={{ fontFamily: "'Playfair Display', serif" }}>
           Ficha de Registro
         </h2>

@@ -4,13 +4,13 @@ import { useAuth } from "@/hooks/useAuth";
 
 declare const __BASE_PATH__: string;
 
-type AuthMode = "login" | "register" | "new";
+type AuthMode = "login" | "register" | "new" | "admin";
 
 export default function Auth() {
   const navigate = useNavigate();
-  const { login, registerFirstAccess, registerNewSupplier, isFirstAccess, supplierExists } = useAuth();
+  const { login, registerFirstAccess, registerNewSupplier, isFirstAccess, supplierExists, loginAdmin } = useAuth();
   const [mode, setMode] = useState<AuthMode>("login");
-  const [supplierId, setSupplierId] = useState("");
+  const [supplierId, setSupplierId] = useState(() => localStorage.getItem("confianza_last_supplier_id") || "");
   const [name, setName] = useState("");
   const [category, setCategory] = useState("");
   const [password, setPassword] = useState("");
@@ -27,12 +27,24 @@ export default function Auth() {
     setNewSupplierId("");
   }
 
+  function handleAdminLogin(e: React.FormEvent) {
+    e.preventDefault();
+    setError("");
+    const result = loginAdmin(password);
+    if (result.success) {
+      navigate("/dashboard/admin");
+    } else {
+      setError(result.message);
+    }
+  }
+
   async function handleLogin(e: React.FormEvent) {
     e.preventDefault();
     setError("");
     setSuccess("");
     setIsSubmitting(true);
 
+    localStorage.setItem("confianza_last_supplier_id", supplierId.trim().toUpperCase());
     const result = await login(supplierId.trim().toUpperCase(), password);
     if (result.success) {
       setSuccess(result.message);
@@ -49,6 +61,7 @@ export default function Auth() {
     setSuccess("");
     setIsSubmitting(true);
 
+    localStorage.setItem("confianza_last_supplier_id", supplierId.trim().toUpperCase());
     const result = await registerFirstAccess(supplierId.trim().toUpperCase(), password, confirmPassword);
     if (result.success) {
       setSuccess(result.message);
@@ -99,11 +112,11 @@ export default function Auth() {
       {/* Background imagen1.jpg */}
       <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden">
         <img
-          src={`${typeof __BASE_PATH__ !== 'undefined' ? __BASE_PATH__ : '/'}images/imagen1.jpeg`}
+          src={`${typeof __BASE_PATH__ !== 'undefined' ? __BASE_PATH__ : '/'}images/producers-bg.jpg`}
           alt=""
           className="absolute inset-0 w-full h-full object-cover object-center"
         />
-        <div className="absolute inset-0" style={{ background: 'rgba(40,22,8,0.72)' }} />
+        <div className="absolute inset-0" style={{ background: 'rgba(40,22,8,0.42)' }} />
       </div>
 
       {/* Logo */}
@@ -230,7 +243,7 @@ export default function Auth() {
           className="space-y-4"
         >
           {/* Código de proveedor - solo login y primer acceso */}
-          {(mode === "login" || mode === "register") && (
+          {(mode === "login" || mode === "register") && mode !== "admin" && (
             <div>
               <label htmlFor="supplier_id" className="block text-sm font-medium text-rose-900/80 mb-1.5">
                 Código de Acceso
@@ -241,6 +254,7 @@ export default function Auth() {
                 value={supplierId}
                 onChange={(e) => handleSupplierIdChange(e.target.value)}
                 placeholder="Ej: SUP-001"
+                autoComplete="username"
                 className="w-full px-4 py-3 rounded-md border border-rose-200/70 text-sm text-rose-950 placeholder:text-rose-700/50 focus:outline-none focus:ring-2 focus:ring-rose-600 focus:border-transparent transition-all bg-white/30"
                 required
               />
