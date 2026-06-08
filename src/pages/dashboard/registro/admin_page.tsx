@@ -127,10 +127,22 @@ export default function AdminPanel() {
   const [selected, setSelected] = useState<Registro | null>(null);
   const [search, setSearch] = useState("");
   const [error, setError] = useState("");
+  const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
+  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     fetchRegistros();
   }, []);
+
+  const deleteRegistro = async (id: string) => {
+    setDeleting(true);
+    const { error } = await supabase.from("registros").delete().eq("id", id);
+    setDeleting(false);
+    setConfirmDelete(null);
+    if (error) { setError(error.message); return; }
+    setRegistros(prev => prev.filter(r => r.id !== id));
+    if (selected?.id === id) setSelected(null);
+  };
 
   const fetchRegistros = async () => {
     setLoading(true);
@@ -208,14 +220,21 @@ export default function AdminPanel() {
                   <p className="text-xs text-stone-500">{r.comunidad || "—"} · {r.distrito || "—"} · {r.provincia || "—"}</p>
                   <p className="text-xs text-stone-400 mt-0.5">Acopiador: {r.nombre_acopiador || "—"} · {r.fecha || r.created_at?.slice(0,10)}</p>
                 </div>
-                {r.lat_parcela && r.lng_parcela && (
-                  <a href={`https://www.google.com/maps/search/?api=1&query=${r.lat_parcela},${r.lng_parcela}`}
-                    target="_blank" rel="noreferrer"
-                    onClick={e => e.stopPropagation()}
-                    className="flex-shrink-0 w-10 h-10 rounded-lg bg-blue-50 border border-blue-200 flex items-center justify-center text-blue-600 hover:bg-blue-100 transition-all">
-                    <i className="ri-map-pin-line text-base" />
-                  </a>
-                )}
+                <div className="flex gap-1 flex-shrink-0">
+                  {r.lat_parcela && r.lng_parcela && (
+                    <a href={`https://www.google.com/maps/search/?api=1&query=${r.lat_parcela},${r.lng_parcela}`}
+                      target="_blank" rel="noreferrer"
+                      onClick={e => e.stopPropagation()}
+                      className="w-10 h-10 rounded-lg bg-blue-50 border border-blue-200 flex items-center justify-center text-blue-600 hover:bg-blue-100 transition-all">
+                      <i className="ri-map-pin-line text-base" />
+                    </a>
+                  )}
+                  <button
+                    onClick={e => { e.stopPropagation(); setConfirmDelete(r.id); }}
+                    className="w-10 h-10 rounded-lg bg-red-50 border border-red-200 flex items-center justify-center text-red-500 hover:bg-red-100 transition-all">
+                    <i className="ri-delete-bin-line text-base" />
+                  </button>
+                </div>
               </div>
             </div>
           ))}
@@ -223,10 +242,16 @@ export default function AdminPanel() {
       ) : (
         /* Detalle completo */
         <div className="space-y-4">
-          <button onClick={() => setSelected(null)}
-            className="flex items-center gap-2 text-sm font-bold text-stone-600 hover:text-stone-800 transition-colors">
-            <i className="ri-arrow-left-line" /> Volver a la lista
-          </button>
+          <div className="flex items-center justify-between">
+            <button onClick={() => setSelected(null)}
+              className="flex items-center gap-2 text-sm font-bold text-stone-600 hover:text-stone-800 transition-colors">
+              <i className="ri-arrow-left-line" /> Volver a la lista
+            </button>
+            <button onClick={() => setConfirmDelete(selected.id)}
+              className="flex items-center gap-2 text-sm font-bold text-red-600 hover:text-red-800 transition-colors border border-red-200 bg-red-50 px-3 py-1.5 rounded-lg hover:bg-red-100">
+              <i className="ri-delete-bin-line" /> Eliminar registro
+            </button>
+          </div>
 
           {/* Fotos */}
           <div className="rounded-xl bg-amber-50 border border-amber-200 p-5">
@@ -278,6 +303,33 @@ export default function AdminPanel() {
                   <p className="text-sm font-medium text-stone-700 mt-0.5 break-words">{val(selected[f.key])}</p>
                 </div>
               ))}
+            </div>
+          </div>
+        </div>
+      )}
+      {/* Modal confirmación eliminar */}
+      {confirmDelete && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/50" onClick={() => setConfirmDelete(null)} />
+          <div className="relative bg-white rounded-2xl shadow-2xl p-6 max-w-sm w-full border border-red-200">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center flex-shrink-0">
+                <i className="ri-delete-bin-line text-red-600 text-lg" />
+              </div>
+              <div>
+                <p className="font-bold text-stone-800">¿Eliminar este registro?</p>
+                <p className="text-xs text-stone-500 mt-0.5">Esta acción no se puede deshacer. El registro se eliminará permanentemente de Supabase.</p>
+              </div>
+            </div>
+            <div className="flex gap-2">
+              <button onClick={() => setConfirmDelete(null)}
+                className="flex-1 py-2.5 rounded-lg text-sm font-bold border border-stone-300 text-stone-600 hover:bg-stone-50 transition-all">
+                Cancelar
+              </button>
+              <button onClick={() => deleteRegistro(confirmDelete)} disabled={deleting}
+                className="flex-1 py-2.5 rounded-lg text-sm font-bold bg-red-600 text-white hover:bg-red-700 transition-all disabled:opacity-60">
+                {deleting ? <><i className="ri-loader-4-line animate-spin mr-1" />Eliminando...</> : "Sí, eliminar"}
+              </button>
             </div>
           </div>
         </div>
