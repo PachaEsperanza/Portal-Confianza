@@ -72,7 +72,7 @@ interface FormData {
   comentariosProductor: string;
   confiabilidad: string; calidadGrano: string; potencialEstrategico: string;
   riesgoPerdida: string; accionFidelizacion: string; fechaSeguimiento: string; notasConfidenciales: string;
-  firmaProductor: string; huellaProductor: string; firmaAcopiador: string; fechaLugar: string; declaracionJurada: boolean;
+  firmaProductor: string; huellaProductor: string; firmaAcopiador: string; fechaLugar: string; declaracionJurada: boolean; dniAcopiador: string; provincia: string; tieneTitulo: string;
 }
 
 const MESES = ["Ene","Feb","Mar","Abr","May","Jun","Jul","Ago","Sep","Oct","Nov","Dic"];
@@ -86,7 +86,7 @@ const SECTIONS: { id: SectionId; num: string; title: string; icon: string; requi
   { id: "certificacion",num: "06", title: "Certificación Orgánica",       icon: "ri-award-line",           required: ["estadoCertificacion"] },
   { id: "capacitacion", num: "07", title: "Capacitación y Asistencia",    icon: "ri-book-open-line",       required: [] },
   { id: "evaluacion",   num: "08", title: "Evaluación del Acopiador",     icon: "ri-file-list-line",       required: [] },
-  { id: "firmas",       num: "09", title: "Firmas y Declaración",         icon: "ri-pen-nib-line",         required: ["firmaProductor","firmaAcopiador","declaracionJurada"] },
+  { id: "firmas",       num: "09", title: "Firmas y Declaración",         icon: "ri-pen-nib-line",         required: ["declaracionJurada"] },
 ];
 
 const SECTION_LABELS: Record<SectionId, string> = {
@@ -130,7 +130,7 @@ const init: FormData = {
   temaMercados:false, temaClima:false, temaGPS:false, temaAsociatividad:false, temaNutricion:false,
   comentariosProductor:"",
   confiabilidad:"", calidadGrano:"", potencialEstrategico:"", riesgoPerdida:"", accionFidelizacion:"", fechaSeguimiento:"", notasConfidenciales:"",
-  firmaProductor:"", huellaProductor:"", firmaAcopiador:"", fechaLugar:"", declaracionJurada:false,
+  firmaProductor:"", huellaProductor:"", firmaAcopiador:"", fechaLugar:"", declaracionJurada:false, dniAcopiador:"", provincia:"", tieneTitulo:"",
 };
 
 // ─── CREMA STYLE HELPERS ─────────────────────────────────────────────────────
@@ -194,9 +194,7 @@ function MediaUpload({ label, accept, value, onChange, required, icon, hint, cap
   return (
     <div>
       <label className={lbl}>{label}{required && reqStar}</label>
-      {!value && (
-        <p className={guide}><i className="ri-arrow-down-line" /> 👆 Toca aquí para {isVideo ? "grabar o subir un video" : "tomar una foto o subir imagen"}</p>
-      )}
+
       {uploadErr && <p className="text-[11px] text-red-500 mb-1">{uploadErr}</p>}
       <div
         onClick={() => !uploading && ref.current?.click()}
@@ -414,6 +412,9 @@ export default function Registro() {
         folio: finalData.folio,
         fecha: finalData.fecha,
         nombre_acopiador: finalData.nombreAcopiador,
+        dni_acopiador: finalData.dniAcopiador,
+        provincia: finalData.provincia,
+        tiene_titulo: finalData.tieneTitulo,
         zona_ruta: finalData.zonaRuta,
         total_productores: finalData.totalProductores,
         nombre: finalData.nombre,
@@ -658,9 +659,9 @@ export default function Registro() {
 
       {/* PORTADA */}
       <div className={card}>
-        <p className="text-[10px] font-bold text-amber-700 uppercase tracking-[0.3em] mb-1">Ficha de Registro · Cacao Chuncho Orgánico</p>
+        <p className="font-bold text-amber-800 mb-1" style={{ fontFamily: "Calibri, 'Calibri', sans-serif", fontSize: "1.05rem", letterSpacing: "0.08em", textTransform: "uppercase" }}>Cacao Chuncho Orgánico</p>
         <h2 className="text-2xl md:text-3xl font-bold text-stone-800 mb-1" style={{ fontFamily: "'Playfair Display', serif" }}>
-          FICHA DE REGISTRO: NUESTRA GRAN FAMILIA
+          Ficha de Registro
         </h2>
         <p className="text-xs text-red-600 font-bold mb-4">👉 Completa todos los campos marcados con <span className="text-red-600">*</span> — son obligatorios para enviar el registro.</p>
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 mb-4">
@@ -672,15 +673,18 @@ export default function Registro() {
             </div>
             <p className="text-[10px] text-amber-600 mt-1">Asignado al enviar</p>
           </div>
-          {[
-            { label: "Nombre del acopiador", k: "nombreAcopiador" as const, ph: "Nombre completo" },
-            { label: "Zona / ruta de acopio", k: "zonaRuta" as const, ph: "Ej. Ruta Quillabamba Norte" },
-          ].map(f => (
-            <div key={f.k} className="min-w-0">
-              <label className={lbl}>{f.label}</label>
-              <input type="text" className={inp + " w-full min-w-0"} placeholder={f.ph} value={String(data[f.k])} onChange={e => upd(f.k, e.target.value)} />
-            </div>
-          ))}
+          <div className="min-w-0">
+            <label className={lbl}>Nombre del acopiador<span className="text-red-500 ml-0.5">*</span></label>
+            <input type="text" className={inp + " w-full min-w-0"} placeholder="Nombre completo" value={data.nombreAcopiador} onChange={e => upd("nombreAcopiador", e.target.value)} />
+          </div>
+          <div className="min-w-0">
+            <label className={lbl}>DNI del acopiador<span className="text-red-500 ml-0.5">*</span></label>
+            <input type="text" maxLength={8} className={inp + " w-full min-w-0"} placeholder="12345678" value={data.dniAcopiador || ""} onChange={e => upd("dniAcopiador" as keyof FormData, e.target.value)} />
+          </div>
+          <div className="min-w-0">
+            <label className={lbl}>Zona / ruta de acopio</label>
+            <input type="text" className={inp + " w-full min-w-0"} placeholder="Ej. Ruta Quillabamba Norte" value={data.zonaRuta} onChange={e => upd("zonaRuta", e.target.value)} />
+          </div>
           <div className="min-w-0">
             <label className={lbl}>Fecha</label>
             <div
@@ -743,7 +747,7 @@ export default function Registro() {
                 onChange={v => upd("fotoProductor", v)} required icon="ri-camera-line"
                 storageBucket="registros-media" storageFolder="fotos-productor"
                 hint="Toca aquí → toma la foto directamente. Rostro visible, buena luz." capture="environment" />
-              <MediaUpload label="Video breve de presentación (opcional)" accept="video/*" value={data.videoProductor}
+              <MediaUpload label="Video breve de presentación" accept="video/*" value={data.videoProductor} required
                 onChange={v => upd("videoProductor", v)} icon="ri-video-line"
                 storageBucket="registros-media" storageFolder="videos-productor"
                 hint="Graba un video corto donde el productor se presente con sus propias palabras." capture="environment" />
@@ -753,25 +757,21 @@ export default function Registro() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="md:col-span-2">
                 <label className={lbl}>Nombre completo del productor{reqStar}</label>
-                <p className={guide}><i className="ri-pencil-line" /> Escribe exactamente como aparece en el DNI</p>
                 <input className={I("nombre")} placeholder="Apellido Paterno · Apellido Materno · Nombres" value={data.nombre} onChange={e => upd("nombre", e.target.value)} />
                 {isErr("nombre") && <p className="text-xs text-red-600 mt-1 font-bold">⚠️ Este campo es obligatorio — escribe el nombre completo</p>}
               </div>
               <div>
                 <label className={lbl}>Número de DNI{reqStar}</label>
-                <p className={guide}><i className="ri-id-card-line" /> Escribe los 8 números del DNI</p>
                 <input className={I("dni")} maxLength={8} placeholder="12345678" value={data.dni} onChange={e => upd("dni", e.target.value)} />
                 {isErr("dni") && <p className="text-xs text-red-600 mt-1 font-bold">⚠️ Escribe el número de DNI</p>}
               </div>
               <div>
                 <label className={lbl}>Número de Celular / WhatsApp{reqStar}</label>
-                <p className={guide}><i className="ri-whatsapp-line" /> Escribe tu número de celular (9 dígitos)</p>
                 <input className={I("telefono")} type="tel" placeholder="9XX XXX XXX" value={data.telefono} onChange={e => upd("telefono", e.target.value)} />
                 {isErr("telefono") && <p className="text-xs text-red-600 mt-1 font-bold">⚠️ Escribe tu número de celular</p>}
               </div>
               <div>
                 <label className={lbl}>Celular de familiar o vecino de confianza</label>
-                <p className="text-[11px] text-stone-500 mb-1">En caso de no poder contactarte directamente</p>
                 <input className={inp} type="tel" placeholder="Número de un familiar o vecino" value={data.telefonoFamiliar} onChange={e => upd("telefonoFamiliar", e.target.value)} />
               </div>
               <div>
@@ -779,8 +779,11 @@ export default function Registro() {
                 <input className={inp} placeholder="Nombre completo" value={data.nombreFamiliar} onChange={e => upd("nombreFamiliar", e.target.value)} />
               </div>
               <div>
-                <label className={lbl}>Sector / Comunidad en Echarati{reqStar}</label>
-                <p className={guide}><i className="ri-map-pin-line" /> Escribe el nombre de tu comunidad o sector</p>
+                <label className={lbl}>Provincia{reqStar}</label>
+                <input className={I("comunidad")} placeholder="Ej. La Convención" value={data.provincia || ""} onChange={e => upd("provincia" as keyof FormData, e.target.value)} />
+              </div>
+              <div>
+                <label className={lbl}>Sector / Comunidad{reqStar}</label>
                 <input className={I("comunidad")} placeholder="Nombre de la comunidad campesina" value={data.comunidad} onChange={e => upd("comunidad", e.target.value)} />
                 {isErr("comunidad") && <p className="text-xs text-red-600 mt-1 font-bold">⚠️ Escribe el nombre de tu comunidad</p>}
               </div>
@@ -794,7 +797,6 @@ export default function Registro() {
             <p className={sublbl}>1.2 — El corazón de la familia (carga familiar)</p>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
               {[
-                { label: "Personas en el hogar", k: "personasHogar" as const, ph: "Ej. 5" },
                 { label: "Personas que trabajan la parcela", k: "personasTrabajan" as const, ph: "Ej. 3" },
                 { label: "Años de experiencia como agricultor", k: "aniosExperiencia" as const, ph: "Ej. 12" },
               ].map(f => (
@@ -805,7 +807,6 @@ export default function Registro() {
               ))}
               <div>
                 <label className={lbl}>¿Con quién vive? (esposa/o, hijos)</label>
-                <p className={guide}><i className="ri-arrow-down-s-line" /> Toca y selecciona una opción</p>
                 <select className={inp} style={selectStyle} value={data.relacionLaboral} onChange={e => upd("relacionLaboral", e.target.value)}>
                   <option value="">👇 Selecciona una opción</option>
                   <option>Solo el titular</option>
@@ -828,7 +829,6 @@ export default function Registro() {
               ].map(f => (
                 <div key={f.k}>
                   <label className={lbl}>{f.label}</label>
-                  <p className={guide}><i className="ri-arrow-down-s-line" /> Toca y selecciona una opción del desplegable</p>
                   <select className={inp} style={selectStyle} value={String(data[f.k])} onChange={e => upd(f.k, e.target.value)}>
                     <option value="">👇 Selecciona una opción</option>
                     {f.opts.map(o => <option key={o}>{o}</option>)}
@@ -860,9 +860,18 @@ export default function Registro() {
               </ul>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-              <div className="md:col-span-2">
-                <label className={lbl}>¿Tiene título o constancia de propiedad? / Nombre de la parcela o chacra{reqStar}</label>
-                <p className={guide}><i className="ri-pencil-line" /> Escribe el nombre con que conoces tu chacra</p>
+              <div>
+                <label className={lbl}>¿Tiene título o constancia de propiedad?{reqStar}</label>
+                <select className={inp} style={selectStyle} value={data.tieneTitulo || ""} onChange={e => upd("tieneTitulo" as keyof FormData, e.target.value)}>
+                  <option value="">— Seleccionar —</option>
+                  <option>Sí — tiene título</option>
+                  <option>Sí — tiene constancia</option>
+                  <option>No tiene aún</option>
+                  <option>En trámite</option>
+                </select>
+              </div>
+              <div>
+                <label className={lbl}>¿Cuál es el nombre de la parcela o chacra?{reqStar}</label>
                 <input className={I("nombreParcela")} placeholder="Ej: La Esperanza, El Mirador, La Chacra de Don Juan..." value={data.nombreParcela} onChange={e => upd("nombreParcela", e.target.value)} />
                 {isErr("nombreParcela") && <p className="text-xs text-red-600 mt-1 font-bold">⚠️ Escribe el nombre de tu parcela o chacra</p>}
               </div>
@@ -873,12 +882,12 @@ export default function Registro() {
                 {isErr("altitud") && <p className="text-xs text-red-600 mt-1 font-bold">⚠️ Escribe la altitud en metros</p>}
               </div>
               <div>
-                <label className={lbl}>Tamaño total de la chacra (hectáreas o topos){reqStar}</label>
+                <label className={lbl}>Tamaño total de la chacra (hectáreas){reqStar}</label>
                 <input className={I("superficieTotal")} type="number" step="0.01" placeholder="Ej. 3.5 hectáreas" value={data.superficieTotal} onChange={e => upd("superficieTotal", e.target.value)} />
                 {isErr("superficieTotal") && <p className="text-xs text-red-600 mt-1 font-bold">⚠️ Escribe el tamaño de tu chacra</p>}
               </div>
               <div>
-                <label className={lbl}>Hectáreas dedicadas al Cacao Chuncho{reqStar}</label>
+                <label className={lbl}>Hectáreas dedicadas al Cacao Chuncho Orgánico{reqStar}</label>
                 <input className={I("areaCacao")} type="number" step="0.01" placeholder="Ej. 2.0 hectáreas" value={data.areaCacao} onChange={e => upd("areaCacao", e.target.value)} />
                 {isErr("areaCacao") && <p className="text-xs text-red-600 mt-1 font-bold">⚠️ Escribe las hectáreas de cacao</p>}
               </div>
@@ -891,13 +900,11 @@ export default function Registro() {
             <p className={sublbl}>2.1 — Producción estimada al año</p>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               <div>
-                <label className={lbl}>Producción estimada al año (quintales o kilos de cacao)</label>
-                <p className="text-[11px] text-stone-500 mb-1">Escribe cuánto cacao produces aproximadamente en un año</p>
-                <input className={inp} placeholder="Ej. 500 kilos / 5 quintales de cacao seco" value={data.estimadoAnual} onChange={e => upd("estimadoAnual", e.target.value)} />
+                <label className={lbl}>Producción estimada al año (quintales o kilos de Cacao Chuncho)</label>
+                <input className={inp} placeholder="Ej. 500 kilos / 5 quintales de Cacao Chuncho seco" value={data.estimadoAnual} onChange={e => upd("estimadoAnual", e.target.value)} />
               </div>
               <div>
                 <label className={lbl}>¿Cómo procesa y seca su cacao en la chacra?</label>
-                <p className={guide}><i className="ri-arrow-down-s-line" /> Toca y selecciona una opción</p>
                 <select className={inp} style={selectStyle} value={data.practicasPostCosecha} onChange={e => upd("practicasPostCosecha", e.target.value)}>
                   <option value="">👇 Selecciona una opción</option>
                   <option>Entrega inmediata sin espera</option>
@@ -932,7 +939,6 @@ export default function Registro() {
               </div>
               <div>
                 <label className={lbl}>Fuente de agua en la parcela{reqStar}</label>
-                <p className={guide}><i className="ri-arrow-down-s-line" /> Toca y selecciona una opción</p>
                 <select className={I("fuenteHidrica")} style={selectStyle} value={data.fuenteHidrica} onChange={e => upd("fuenteHidrica", e.target.value)}>
                   <option value="">👇 Selecciona una opción</option>
                   <option>Sí — río o quebrada permanente</option>
@@ -1019,7 +1025,6 @@ export default function Registro() {
                 { label: "Estimado anual (kg cacao baba){reqStar}", k: "estimadoAnual" as const, ph: "Ej. 2000 kg" },
                 { label: "Rendimiento últimos 2 años", k: "rendimientoHistorico" as const, ph: "Ej. 2024: 1800kg" },
                 { label: "Comprador actual", k: "compradorActual" as const, ph: "Nombre o empresa" },
-                { label: "Precio recibido por kg (S/.)", k: "precioKg" as const, ph: "S/. por kg" },
               ].map(f => (
                 <div key={f.k}>
                   <label className={lbl}>{f.label.replace("{reqStar}","")}{f.label.includes("reqStar") && reqStar}</label>
@@ -1060,7 +1065,6 @@ export default function Registro() {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
               <div>
                 <label className={lbl}>Plaga o enfermedad más agresiva{reqStar}</label>
-                <p className={guide}><i className="ri-arrow-down-s-line" /> Toca y selecciona la enfermedad principal</p>
                 <select className={I("plagaPrincipal")} style={selectStyle} value={data.plagaPrincipal} onChange={e => upd("plagaPrincipal", e.target.value)}>
                   <option value="">👇 Selecciona una opción</option>
                   <option>Moniliasis (Moniliophthora roreri)</option>
@@ -1104,7 +1108,6 @@ export default function Registro() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               <div>
                 <label className={lbl}>Estado de certificación orgánica{reqStar}</label>
-                <p className={guide}><i className="ri-arrow-down-s-line" /> Toca y selecciona tu situación actual</p>
                 <select className={I("estadoCertificacion")} style={selectStyle} value={data.estadoCertificacion} onChange={e => upd("estadoCertificacion", e.target.value)}>
                   <option value="">👇 Selecciona una opción</option>
                   <option>Certificación activa y vigente</option>
@@ -1217,40 +1220,8 @@ export default function Registro() {
         {active === "firmas" && (
           <>
             <h3 className="text-xl font-bold text-stone-800" style={{ fontFamily: "'Playfair Display', serif" }}>9. Firmas y Declaración Jurada</h3>
-            <div className={`p-3 rounded-lg border-2 border-red-400 bg-red-50`}>
-              <p className="text-sm font-bold text-red-700">📋 INSTRUCCIONES FINALES:</p>
-              <ul className="text-xs text-red-700 mt-1 space-y-0.5 list-disc pl-4">
-                <li>Toca el recuadro de firma del productor y toma foto de su firma en papel.</li>
-                <li>Toca el recuadro de firma del acopiador y toma foto de tu firma.</li>
-                <li>Marca la casilla de declaración jurada para confirmar que todo es verdadero.</li>
-                <li>Luego toca el botón verde de enviar.</li>
-              </ul>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-              <div className="space-y-4">
-                <p className={sublbl}>Firma del productor</p>
-                <MediaUpload label="Foto de la firma del productor" accept="image/*" value={data.firmaProductor}
-                storageBucket="registros-media" storageFolder="firmas"
-                  onChange={v => upd("firmaProductor", v)} required icon="ri-pen-nib-line"
-                  hint="Toma foto de la firma manuscrita sobre papel" />
-                {isErr("firmaProductor") && <p className="text-xs text-red-600 font-bold">⚠️ La firma del productor es obligatoria</p>}
-                <MediaUpload label="Foto de la huella digital (opcional)" accept="image/*" value={data.huellaProductor}
-                storageBucket="registros-media" storageFolder="huellas"
-                  onChange={v => upd("huellaProductor", v)} icon="ri-fingerprint-line"
-                  hint="Toma foto de la huella dactilar del productor" />
-              </div>
-              <div className="space-y-4">
-                <p className={sublbl}>Firma del acopiador responsable</p>
-                <MediaUpload label="Foto de la firma del acopiador" accept="image/*" value={data.firmaAcopiador}
-                storageBucket="registros-media" storageFolder="firmas"
-                  onChange={v => upd("firmaAcopiador", v)} required icon="ri-pen-nib-line"
-                  hint="Foto de la firma del acopiador que levantó la ficha" />
-                {isErr("firmaAcopiador") && <p className="text-xs text-red-600 font-bold">⚠️ La firma del acopiador es obligatoria</p>}
-                <div>
-                  <label className={lbl}>Fecha y lugar del levantamiento</label>
-                  <input className={inp} placeholder="Ej. Quillabamba, 12 de marzo de 2025" value={data.fechaLugar} onChange={e => upd("fechaLugar", e.target.value)} />
-                </div>
-              </div>
+            <div className="p-3 rounded-lg border-2 border-blue-300 bg-blue-50 mb-2">
+              <p className="text-xs text-blue-800 font-bold">ℹ️ Marca la casilla de declaración jurada para confirmar que todos los datos son verídicos y luego toca el botón verde de enviar.</p>
             </div>
 
             <div className={`p-4 rounded-xl border-2 transition-all ${data.declaracionJurada ? "border-green-500 bg-green-50" : isErr("declaracionJurada") ? "border-red-500 bg-red-50" : "border-amber-400 bg-amber-50"}`}>
