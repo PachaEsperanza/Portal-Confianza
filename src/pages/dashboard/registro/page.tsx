@@ -1,4 +1,5 @@
 import { useState, useRef } from "react";
+import ParcelaMapPicker, { ParcelaCoords } from './ParcelaMapPicker';
 import { createClient } from "@supabase/supabase-js";
 
 const SUPABASE_URL = "https://wxgqhhfgrddgvxkovcdk.supabase.co";
@@ -44,7 +45,7 @@ interface FormData {
   nombreParcela: string; altitud: string; superficieTotal: string; areaCacao: string; otrosCultivos: string;
   viasTrocha: boolean; viasAfirmada: boolean; viasAsfaltado: boolean; viasHerradura: boolean; viasFluvial: boolean; viasPie: boolean;
   distanciaVia: string; tiempoFlete: string; tipoSuelo: string; sistemaSombra: string; fuenteHidrica: string;
-  gpsVertices: { vertice: string; lat: string; lon: string; alt: string }[];
+  parcelaCoords: ParcelaCoords | null;
   codigoParcela: string;
   edadPlantas: string; distanciamiento: string; numeroPlantas: string; pctProduccion: string;
   gradosBrix: string; fechaMuestreoBrix: string; colorGrano: string; practicasPostCosecha: string;
@@ -72,14 +73,14 @@ interface FormData {
   comentariosProductor: string;
   confiabilidad: string; calidadGrano: string; potencialEstrategico: string;
   riesgoPerdida: string; accionFidelizacion: string; fechaSeguimiento: string; notasConfidenciales: string;
-  firmaProductor: string; huellaProductor: string; firmaAcopiador: string; fechaLugar: string; declaracionJurada: boolean; dniAcopiador: string; provincia: string; tieneTitulo: string;
+  firmaProductor: string; huellaProductor: string; firmaAcopiador: string; fechaLugar: string; declaracionJurada: boolean; dniAcopiador: string; provincia: string; tieneTitulo: string; fotoAcopiadorProductor: string;
 }
 
 const MESES = ["Ene","Feb","Mar","Abr","May","Jun","Jul","Ago","Sep","Oct","Nov","Dic"];
 
 const SECTIONS: { id: SectionId; num: string; title: string; icon: string; required: (keyof FormData)[] }[] = [
   { id: "identidad",    num: "01", title: "Identidad del Productor",      icon: "ri-user-line",           required: ["nombre","dni","telefono","comunidad","distrito","fotoProductor"] },
-  { id: "parcela",      num: "02", title: "Parcela y Georreferenciación", icon: "ri-map-pin-line",         required: ["nombreParcela","altitud","superficieTotal","areaCacao","fuenteHidrica"] },
+  { id: "parcela",      num: "02", title: "Parcela y Georreferenciación", icon: "ri-map-pin-line",         required: ["nombreParcela","superficieTotal","areaCacao","fuenteHidrica"] },
   { id: "cultivo",      num: "03", title: "Características del Cultivo",  icon: "ri-plant-line",           required: ["edadPlantas","distanciamiento","gradosBrix"] },
   { id: "produccion",   num: "04", title: "Producción y Cosecha",         icon: "ri-shopping-basket-line", required: ["estimadoAnual","tipoAcopio"] },
   { id: "sanidad",      num: "05", title: "Sanidad Vegetal",              icon: "ri-shield-line",          required: ["plagaPrincipal","pctAfectacionPrincipal"] },
@@ -109,7 +110,7 @@ const init: FormData = {
   nombreParcela:"", altitud:"", superficieTotal:"", areaCacao:"", otrosCultivos:"",
   viasTrocha:false, viasAfirmada:false, viasAsfaltado:false, viasHerradura:false, viasFluvial:false, viasPie:false,
   distanciaVia:"", tiempoFlete:"", tipoSuelo:"", sistemaSombra:"", fuenteHidrica:"",
-  gpsVertices:[{vertice:"V1",lat:"",lon:"",alt:""},{vertice:"V2",lat:"",lon:"",alt:""},{vertice:"V3",lat:"",lon:"",alt:""}],
+  parcelaCoords: null,
   codigoParcela:"",
   edadPlantas:"", distanciamiento:"", numeroPlantas:"", pctProduccion:"", gradosBrix:"", fechaMuestreoBrix:"", colorGrano:"",
   practicasPostCosecha:"", herramientaCosecha:"", notasSensoriales:"",
@@ -130,7 +131,7 @@ const init: FormData = {
   temaMercados:false, temaClima:false, temaGPS:false, temaAsociatividad:false, temaNutricion:false,
   comentariosProductor:"",
   confiabilidad:"", calidadGrano:"", potencialEstrategico:"", riesgoPerdida:"", accionFidelizacion:"", fechaSeguimiento:"", notasConfidenciales:"",
-  firmaProductor:"", huellaProductor:"", firmaAcopiador:"", fechaLugar:"", declaracionJurada:false, dniAcopiador:"", provincia:"", tieneTitulo:"",
+  firmaProductor:"", huellaProductor:"", firmaAcopiador:"", fechaLugar:"", declaracionJurada:false, dniAcopiador:"", provincia:"", tieneTitulo:"", fotoAcopiadorProductor:"",
 };
 
 // ─── CREMA STYLE HELPERS ─────────────────────────────────────────────────────
@@ -425,6 +426,7 @@ export default function Registro() {
         comunidad: finalData.comunidad,
         distrito: finalData.distrito,
         foto_productor: finalData.fotoProductor,
+        foto_acopiador_productor: finalData.fotoAcopiadorProductor,
         video_productor: finalData.videoProductor,
         personas_hogar: finalData.personasHogar || null,
         personas_trabajan: finalData.personasTrabajan || null,
@@ -439,7 +441,7 @@ export default function Registro() {
         tier: finalData.tier,
         justificacion_tier: finalData.justificacionTier,
         nombre_parcela: finalData.nombreParcela,
-        altitud: finalData.altitud || null,
+        altitud: finalData.parcelaCoords?.altitud || null,
         superficie_total: finalData.superficieTotal || null,
         area_cacao: finalData.areaCacao || null,
         otros_cultivos: finalData.otrosCultivos,
@@ -454,7 +456,9 @@ export default function Registro() {
         tipo_suelo: finalData.tipoSuelo,
         sistema_sombra: finalData.sistemaSombra,
         fuente_hidrica: finalData.fuenteHidrica,
-        gps_vertices: finalData.gpsVertices,
+        lat_parcela: finalData.parcelaCoords?.lat ?? null,
+        lng_parcela: finalData.parcelaCoords?.lng ?? null,
+        altitud_gps: finalData.parcelaCoords?.altitud ?? null,
         codigo_parcela: finalData.codigoParcela,
         edad_plantas: finalData.edadPlantas || null,
         distanciamiento: finalData.distanciamiento,
@@ -746,11 +750,15 @@ export default function Registro() {
               <MediaUpload label="Foto del productor" accept="image/*" value={data.fotoProductor}
                 onChange={v => upd("fotoProductor", v)} required icon="ri-camera-line"
                 storageBucket="registros-media" storageFolder="fotos-productor"
-                hint="Toca aquí → toma la foto directamente. Rostro visible, buena luz." capture="environment" />
+                hint="Toca aquí → toma la foto directamente. Rostro visible, buena luz." />
               <MediaUpload label="Video breve de presentación" accept="video/*" value={data.videoProductor} required
                 onChange={v => upd("videoProductor", v)} icon="ri-video-line"
                 storageBucket="registros-media" storageFolder="videos-productor"
-                hint="Graba un video corto donde el productor se presente con sus propias palabras." capture="environment" />
+                hint="Graba un video corto o selecciona uno de tu galería." />
+              <MediaUpload label="Foto del acopiador con el agricultor juntos" accept="image/*" value={data.fotoAcopiadorProductor || ""} required
+                storageBucket="registros-media" storageFolder="fotos-conjunto"
+                onChange={v => upd("fotoAcopiadorProductor" as keyof FormData, v)} icon="ri-group-line"
+                hint="Foto de ambos juntos en la chacra. Selecciona de la galería o toma una ahora." />
             </div>
 
             <p className={sublbl}>1.1 — Datos personales y de contacto</p>
@@ -875,12 +883,7 @@ export default function Registro() {
                 <input className={I("nombreParcela")} placeholder="Ej: La Esperanza, El Mirador, La Chacra de Don Juan..." value={data.nombreParcela} onChange={e => upd("nombreParcela", e.target.value)} />
                 {isErr("nombreParcela") && <p className="text-xs text-red-600 mt-1 font-bold">⚠️ Escribe el nombre de tu parcela o chacra</p>}
               </div>
-              <div>
-                <label className={lbl}>Altitud (metros sobre el nivel del mar){reqStar}</label>
-                <p className={guide}><i className="ri-arrow-up-line" /> Escribe la altura en metros (msnm)</p>
-                <input className={I("altitud")} type="number" placeholder="Ej. 1100" value={data.altitud} onChange={e => upd("altitud", e.target.value)} />
-                {isErr("altitud") && <p className="text-xs text-red-600 mt-1 font-bold">⚠️ Escribe la altitud en metros</p>}
-              </div>
+
               <div>
                 <label className={lbl}>Tamaño total de la chacra (hectáreas){reqStar}</label>
                 <input className={I("superficieTotal")} type="number" step="0.01" placeholder="Ej. 3.5 hectáreas" value={data.superficieTotal} onChange={e => upd("superficieTotal", e.target.value)} />
@@ -950,11 +953,11 @@ export default function Registro() {
               </div>
             </div>
 
-            <p className={sublbl}>2.4 — Coordenadas GPS de la parcela <span className="text-red-600 normal-case">(requerido por la Unión Europea)</span></p>
-            <div className="p-3 rounded-lg border-2 border-blue-400 bg-blue-50 text-xs text-blue-800 mb-2">
-              <i className="ri-map-2-line mr-1 font-bold" /> <strong>¿Por qué pedimos esto?</strong> La Unión Europea exige saber exactamente dónde está tu chacra para comprar tu cacao. Si no tienes GPS ahora, el técnico te ayudará a tomarlo en la próxima visita.
-            </div>
-            <GPSRows rows={data.gpsVertices} onChange={v => setData(d => ({ ...d, gpsVertices: v }))} />
+            <p className={sublbl}>2.4 — Ubicación satelital de la parcela <span className="text-red-600 normal-case">(requerido por la Unión Europea)</span></p>
+            <ParcelaMapPicker
+              value={data.parcelaCoords}
+              onChange={(coords: ParcelaCoords) => setData(d => ({ ...d, parcelaCoords: coords }))}
+            />
           </>
         )}
 
@@ -1003,6 +1006,32 @@ export default function Registro() {
                 </select>
               </div>
               <div>
+                <label className={lbl}>Fecha del último muestreo brix</label>
+                <input className={inp} type="date" value={data.fechaMuestreoBrix} onChange={e => upd("fechaMuestreoBrix", e.target.value)} />
+              </div>
+              <div>
+                <label className={lbl}>Color predominante del grano en corte</label>
+                <select className={inp} style={selectStyle} value={data.colorGrano} onChange={e => upd("colorGrano", e.target.value)}>
+                  <option value="">— Seleccionar —</option>
+                  <option>Violeta intenso — muy alta antocianina</option>
+                  <option>Violeta medio</option>
+                  <option>Violeta pálido / rosado</option>
+                  <option>Blanco / crema — fino aromático</option>
+                  <option>Mezcla violeta y blanco</option>
+                  <option>No observado aún</option>
+                </select>
+              </div>
+              <div>
+                <label className={lbl}>Prácticas de post-cosecha del productor</label>
+                <select className={inp} style={selectStyle} value={data.practicasPostCosecha} onChange={e => upd("practicasPostCosecha", e.target.value)}>
+                  <option value="">— Seleccionar —</option>
+                  <option>Entrega inmediata sin espera</option>
+                  <option>Deja reposar en costal 6–12 horas</option>
+                  <option>Deja reposar más de 12 horas</option>
+                  <option>Inicia pre-fermentación artesanal</option>
+                </select>
+              </div>
+              <div>
                 <label className={lbl}>Notas sensoriales del cacao</label>
                 <input className={inp} placeholder="Ej. frutal, floral, nuez, cítrico..." value={data.notasSensoriales} onChange={e => upd("notasSensoriales", e.target.value)} />
               </div>
@@ -1022,7 +1051,7 @@ export default function Registro() {
             </div>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
               {[
-                { label: "Estimado anual (kg cacao baba){reqStar}", k: "estimadoAnual" as const, ph: "Ej. 2000 kg" },
+                { label: "ESTIMADO ANUAL DE COSECHA — KG BABA{reqStar}", k: "estimadoAnual" as const, ph: "kg baba/año" },
                 { label: "Rendimiento últimos 2 años", k: "rendimientoHistorico" as const, ph: "Ej. 2024: 1800kg" },
                 { label: "Comprador actual", k: "compradorActual" as const, ph: "Nombre o empresa" },
               ].map(f => (
@@ -1034,14 +1063,33 @@ export default function Registro() {
               ))}
               <div>
                 <label className={lbl}>Tipo de acopio{reqStar}</label>
-                <p className={guide}><i className="ri-arrow-down-s-line" /> Toca y selecciona</p>
                 <select className={I("tipoAcopio")} style={selectStyle} value={data.tipoAcopio} onChange={e => upd("tipoAcopio", e.target.value)}>
-                  <option value="">👇 Selecciona una opción</option>
+                  <option value="">— Seleccionar —</option>
                   <option>Sí — tiene punto de acopio propio</option>
                   <option>No — entrega directamente al acopiador</option>
                   <option>Acopio comunal compartido</option>
                 </select>
                 {isErr("tipoAcopio") && <p className="text-xs text-red-600 mt-1 font-bold">⚠️ Selecciona una opción</p>}
+              </div>
+              <div>
+                <label className={lbl}>Almacenamiento disponible</label>
+                <select className={inp} style={selectStyle} value={data.almacenamiento} onChange={e => upd("almacenamiento", e.target.value)}>
+                  <option value="">— Seleccionar —</option>
+                  <option>Sí — almacén propio en parcela</option>
+                  <option>Sí — almacén comunal</option>
+                  <option>No dispone de almacén</option>
+                </select>
+              </div>
+              <div>
+                <label className={lbl}>Forma de transporte hasta el acopio</label>
+                <select className={inp} style={selectStyle} value={data.transporte} onChange={e => upd("transporte", e.target.value)}>
+                  <option value="">— Seleccionar —</option>
+                  <option>Acémila / mula</option>
+                  <option>Mototaxi o moto carga</option>
+                  <option>A pie</option>
+                  <option>Camioneta propia o arrendada</option>
+                  <option>El acopiador recoge en parcela</option>
+                </select>
               </div>
             </div>
             <p className={sublbl}>Meses de cosecha — toca los meses en que cosechas</p>
