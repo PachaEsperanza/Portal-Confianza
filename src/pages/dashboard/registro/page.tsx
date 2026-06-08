@@ -459,6 +459,7 @@ export default function Registro() {
         lat_parcela: finalData.parcelaCoords?.lat ?? null,
         lng_parcela: finalData.parcelaCoords?.lng ?? null,
         altitud_gps: finalData.parcelaCoords?.altitud ?? null,
+        perimetro_radio: finalData.parcelaCoords?.perimetroRadio ?? null,
         codigo_parcela: finalData.codigoParcela,
         edad_plantas: finalData.edadPlantas || null,
         distanciamiento: finalData.distanciamiento,
@@ -563,8 +564,18 @@ export default function Registro() {
       if (dbError) throw new Error("Error al guardar: " + dbError.message);
 
       // 2. Disparar Edge Function para enviar correo
+      // Aplanar parcelaCoords para que el correo pueda acceder a lat_parcela, etc.
+      const registroParaCorreo = {
+        ...finalData,
+        lat_parcela: finalData.parcelaCoords?.lat ?? null,
+        lng_parcela: finalData.parcelaCoords?.lng ?? null,
+        altitud_gps: finalData.parcelaCoords?.altitud ?? null,
+        perimetro_radio: finalData.parcelaCoords?.perimetroRadio ?? null,
+        perimetro_radio: finalData.parcelaCoords?.perimetroRadio ?? null,
+      };
+
       await supabase.functions.invoke("enviar-registro", {
-        body: { registro: finalData },
+        body: { registro: registroParaCorreo },
       });
 
       setData(d => ({ ...d, folio: confirmedFolio, fecha: fechaHora }));

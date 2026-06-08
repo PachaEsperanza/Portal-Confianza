@@ -61,12 +61,14 @@ function loadGoogleMapsScript(onSuccess: () => void, onError: () => void) {
 const DEFAULT_LAT = -12.8636;
 const DEFAULT_LNG = -72.7011;
 
-const RADIOS = [
+const RADIOS_RAPIDOS = [
   { label: '100 m', value: 100 },
   { label: '200 m', value: 200 },
   { label: '500 m', value: 500 },
   { label: '1 km', value: 1000 },
   { label: '2 km', value: 2000 },
+  { label: '5 km', value: 5000 },
+  { label: '10 km', value: 10000 },
 ];
 
 export default function ParcelaMapPicker({ value, onChange }: ParcelaMapPickerProps) {
@@ -224,11 +226,17 @@ export default function ParcelaMapPicker({ value, onChange }: ParcelaMapPickerPr
 
   return (
     <div className="space-y-3">
-      {/* Instructions */}
-      <div className="p-3 rounded-lg border border-amber-300 bg-amber-50 text-xs text-amber-800">
+      {/* Info box azul — por qué pedimos esto */}
+      <div className="p-3 rounded-lg border-2 border-blue-400 bg-blue-50 text-xs text-blue-800">
+        <p className="font-bold mb-1"><i className="ri-map-2-line mr-1" /> <strong>¿Por qué pedimos esto?</strong></p>
+        <p>La Unión Europea exige saber exactamente dónde está tu chacra para comprar tu cacao (Reglamento EUDR). Si no tienes GPS ahora, el técnico te ayudará a tomarlo en la próxima visita.</p>
+      </div>
+
+      {/* Instructions — fondo rojito */}
+      <div className="p-3 rounded-lg border border-red-300 bg-red-50 text-xs text-red-800">
         <p className="font-bold mb-1">📍 Cómo marcar tu parcela:</p>
         <ul className="space-y-0.5 list-disc pl-4">
-          <li>Toca <strong>"Usar mi ubicación GPS"</strong> para centrar el mapa donde estás</li>
+          <li>Toca <strong className="text-red-900">"Usar mi ubicación GPS"</strong> para centrar el mapa donde estás</li>
           <li>O toca cualquier punto del mapa para colocar el marcador en tu parcela</li>
           <li>Puedes arrastrar el marcador rojo para ajustar la posición exacta</li>
         </ul>
@@ -324,13 +332,26 @@ export default function ParcelaMapPicker({ value, onChange }: ParcelaMapPickerPr
             </button>
           )}
         </div>
-        <div className="flex flex-wrap gap-2">
-          {RADIOS.map(r => (
+        <div className="flex flex-wrap gap-2 mb-2">
+          {RADIOS_RAPIDOS.map(r => (
             <button key={r.value} type="button" onClick={() => handleRadioChange(radioSeleccionado === r.value ? null : r.value)}
               className={`px-3 py-1.5 rounded-lg text-xs font-bold border-2 transition-all ${radioSeleccionado === r.value ? 'border-amber-500 bg-amber-50 text-amber-700' : 'border-stone-200 bg-white text-stone-600 hover:border-amber-300'}`}>
               {r.label}
             </button>
           ))}
+        </div>
+        <div className="flex items-center gap-2">
+          <input
+            type="number"
+            min="50"
+            placeholder="O escribe km personalizados Ej: 15"
+            className="flex-1 px-3 py-2 bg-white border border-stone-300 rounded-lg text-xs font-medium text-stone-700 focus:outline-none focus:ring-2 focus:ring-amber-400/40 focus:border-amber-400"
+            onChange={e => {
+              const val = e.target.value ? Number(e.target.value) * 1000 : null;
+              handleRadioChange(val);
+            }}
+          />
+          <span className="text-xs text-stone-500 font-medium whitespace-nowrap">km</span>
         </div>
         {radioSeleccionado && value && (
           <p className="text-[11px] text-amber-700 font-medium">
