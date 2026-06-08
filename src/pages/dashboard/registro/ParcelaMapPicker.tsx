@@ -183,27 +183,19 @@ export default function ParcelaMapPicker({ value, onChange }: ParcelaMapPickerPr
   const handleGPS = useCallback(() => {
     if (!navigator.geolocation) return;
     setLocating(true);
-    // Primera llamada: despierta el GPS hardware
     navigator.geolocation.getCurrentPosition(
-      () => {
-        // Segunda llamada: ahora sí tiene precisión real del GPS
-        navigator.geolocation.getCurrentPosition(
-          (pos) => {
-            const lat = pos.coords.latitude;
-            const lng = pos.coords.longitude;
-            setLocating(false);
-            if (mapInstanceRef.current) { mapInstanceRef.current.setCenter({ lat, lng }); mapInstanceRef.current.setZoom(17); }
-            if (markerRef.current) { markerRef.current.setPosition({ lat, lng }); markerRef.current.setVisible(true); }
-            const newCoords = { lat, lng, altitud: value?.altitud, perimetroRadio: radioSeleccionado ?? undefined };
-            onChange(newCoords);
-            updateCircle(lat, lng, radioSeleccionado);
-          },
-          () => setLocating(false),
-          { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
-        );
+      (pos) => {
+        const lat = pos.coords.latitude;
+        const lng = pos.coords.longitude;
+        setLocating(false);
+        if (mapInstanceRef.current) { mapInstanceRef.current.setCenter({ lat, lng }); mapInstanceRef.current.setZoom(17); }
+        if (markerRef.current) { markerRef.current.setPosition({ lat, lng }); markerRef.current.setVisible(true); }
+        const newCoords = { lat, lng, altitud: value?.altitud, perimetroRadio: radioSeleccionado ?? undefined };
+        onChange(newCoords);
+        updateCircle(lat, lng, radioSeleccionado);
       },
       () => setLocating(false),
-      { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 }
+      { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
     );
   }, [onChange, value, radioSeleccionado, updateCircle]);
 
@@ -258,7 +250,7 @@ export default function ParcelaMapPicker({ value, onChange }: ParcelaMapPickerPr
           : <><i className="ri-focus-3-line" />Usar mi ubicación GPS actual</>}
       </button>
       <p className="text-xs text-center font-bold text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2">
-        ⚠️ Toca el botón <span className="underline">2 veces</span> para ubicación precisa — la segunda lectura da el punto exacto.
+        📱 En celular: toca <span className="underline">2 veces</span> para mayor precisión. En computadora: haz click en el mapa directamente.
       </p>
 
       {/* Map */}
