@@ -124,7 +124,7 @@ export default function Auth() {
       {/* Background imagen1.jpg */}
       <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden">
         <img
-          src={`${typeof __BASE_PATH__ !== 'undefined' ? __BASE_PATH__ : '/'}images/imagen1.jpeg`}
+          src={`${typeof __BASE_PATH__ !== 'undefined' ? __BASE_PATH__ : '/'}images/producers-bg.jpg`}
           alt=""
           className="absolute inset-0 w-full h-full object-cover object-center"
         />

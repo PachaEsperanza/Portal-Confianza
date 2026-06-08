@@ -187,7 +187,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(null);
   }
 
-  const ADMIN_PASSWORD = "ConfianzaAdmin2025";
+  const ADMIN_PASSWORD = "C0mpartoEsp26";
 
   function loginAdmin(password: string): { success: boolean; message: string } {
     if (password === ADMIN_PASSWORD) {
