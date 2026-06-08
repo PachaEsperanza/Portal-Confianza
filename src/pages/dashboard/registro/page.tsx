@@ -87,7 +87,7 @@ const SECTIONS: { id: SectionId; num: string; title: string; icon: string; requi
   { id: "certificacion",num: "06", title: "Certificación Orgánica",       icon: "ri-award-line",           required: ["estadoCertificacion"] },
   { id: "capacitacion", num: "07", title: "Capacitación y Asistencia",    icon: "ri-book-open-line",       required: [] },
   { id: "evaluacion",   num: "08", title: "Evaluación del Acopiador",     icon: "ri-file-list-line",       required: [] },
-  { id: "firmas",       num: "09", title: "Firmas y Declaración",         icon: "ri-pen-nib-line",         required: ["declaracionJurada"] },
+  { id: "firmas",       num: "09", title: "Declaración Jurada",            icon: "ri-pen-nib-line",         required: ["fotoAcopiadorProductor","declaracionJurada"] },
 ];
 
 const SECTION_LABELS: Record<SectionId, string> = {
@@ -766,10 +766,7 @@ export default function Registro() {
                 onChange={v => upd("videoProductor", v)} icon="ri-video-line"
                 storageBucket="registros-media" storageFolder="videos-productor"
                 hint="Graba un video corto o selecciona uno de tu galería." />
-              <MediaUpload label="Foto del acopiador con el agricultor juntos" accept="image/*" value={data.fotoAcopiadorProductor || ""} required
-                storageBucket="registros-media" storageFolder="fotos-conjunto"
-                onChange={v => upd("fotoAcopiadorProductor" as keyof FormData, v)} icon="ri-group-line"
-                hint="Foto de ambos juntos en la chacra. Selecciona de la galería o toma una ahora." />
+
             </div>
 
             <p className={sublbl}>1.1 — Datos personales y de contacto</p>
@@ -1278,10 +1275,23 @@ export default function Registro() {
         {/* ══ 9. FIRMAS ══ */}
         {active === "firmas" && (
           <>
-            <h3 className="text-xl font-bold text-stone-800" style={{ fontFamily: "'Playfair Display', serif" }}>9. Firmas y Declaración Jurada</h3>
+            <h3 className="text-xl font-bold text-stone-800" style={{ fontFamily: "'Playfair Display', serif" }}>9. Declaración Jurada</h3>
             <div className="p-3 rounded-lg border-2 border-blue-300 bg-blue-50 mb-2">
               <p className="text-xs text-blue-800 font-bold">ℹ️ Marca la casilla de declaración jurada para confirmar que todos los datos son verídicos y luego toca el botón verde de enviar.</p>
             </div>
+
+            {/* Foto acopiador con productor */}
+            <MediaUpload
+              label="Foto del acopiador con el agricultor juntos"
+              accept="image/*"
+              value={data.fotoAcopiadorProductor || ""}
+              onChange={v => upd("fotoAcopiadorProductor" as keyof FormData, v)}
+              required
+              storageBucket="registros-media"
+              storageFolder="fotos-conjunto"
+              icon="ri-group-line"
+              hint="Foto de ambos juntos en la chacra. Obligatoria para completar el registro."
+            />
 
             <div className={`p-4 rounded-xl border-2 transition-all ${data.declaracionJurada ? "border-green-500 bg-green-50" : isErr("declaracionJurada") ? "border-red-500 bg-red-50" : "border-amber-400 bg-amber-50"}`}>
               <label className="flex items-start gap-3 cursor-pointer">
