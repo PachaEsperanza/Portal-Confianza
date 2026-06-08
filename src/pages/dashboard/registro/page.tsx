@@ -598,14 +598,17 @@ export default function Registro() {
 
   if (submitted) {
     return (
-      <div className="flex flex-col items-center justify-center py-20 text-center space-y-4">
-        <div className="w-20 h-20 rounded-full flex items-center justify-center bg-green-600">
+      <div className="flex flex-col items-center justify-center py-16 text-center space-y-4 rounded-2xl border-2 border-amber-200 px-8"
+        style={{ background: '#fdf6e3' }}>
+        <div className="w-20 h-20 rounded-full flex items-center justify-center bg-green-600 shadow-lg">
           <i className="ri-check-double-line text-4xl text-white" />
         </div>
         <h2 className="text-2xl font-bold text-stone-800" style={{ fontFamily: "'Playfair Display', serif" }}>¡Registro Enviado!</h2>
-        <p className="text-sm text-stone-600 max-w-sm">La ficha del productor fue completada y firmada. Los datos tienen validez de declaración jurada.</p>
+        <p className="text-sm text-stone-700 max-w-sm font-medium leading-relaxed">
+          La ficha del productor fue completada y firmada. Los datos tienen validez de declaración jurada.
+        </p>
         <button onClick={() => { setData({ ...init, folio: getNextFolio() }); setSubmitted(false); setActive("identidad"); }}
-          className="mt-4 px-6 py-3 rounded-lg text-sm font-bold text-white bg-amber-700 hover:bg-amber-800 transition-all">
+          className="mt-4 px-6 py-3 rounded-lg text-sm font-bold text-white bg-amber-700 hover:bg-amber-800 transition-all shadow-md">
           <i className="ri-add-line mr-2" /> Nuevo registro
         </button>
       </div>
