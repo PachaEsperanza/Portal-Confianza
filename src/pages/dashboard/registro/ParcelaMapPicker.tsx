@@ -257,8 +257,8 @@ export default function ParcelaMapPicker({ value, onChange }: ParcelaMapPickerPr
           ? <><span className="animate-spin w-4 h-4 border-2 border-emerald-400 border-t-emerald-700 rounded-full" />Obteniendo ubicación GPS...</>
           : <><i className="ri-focus-3-line" />Usar mi ubicación GPS actual</>}
       </button>
-      <p className="text-[11px] text-stone-500 text-center font-medium">
-        💡 Para mayor precisión, toca el botón <strong>2 veces</strong> — la segunda lectura ubica el punto exacto.
+      <p className="text-xs text-center font-bold text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2">
+        ⚠️ Toca el botón <span className="underline">2 veces</span> para ubicación precisa — la segunda lectura da el punto exacto.
       </p>
 
       {/* Map */}
