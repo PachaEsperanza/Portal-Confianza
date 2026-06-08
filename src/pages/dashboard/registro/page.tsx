@@ -369,6 +369,20 @@ export default function Registro() {
     const allMissing: { section: string; num: string; id: SectionId; fields: string[] }[] = [];
     const allNewErrors: Partial<Record<keyof FormData, boolean>> = {};
 
+    // Validar campos de portada (nombre y DNI del acopiador)
+    const portadaMissing: string[] = [];
+    if (!data.nombreAcopiador.trim()) {
+      allNewErrors["nombreAcopiador"] = true;
+      portadaMissing.push("Nombre del acopiador");
+    }
+    if (!String(data.dniAcopiador || "").trim()) {
+      allNewErrors["dniAcopiador"] = true;
+      portadaMissing.push("DNI del acopiador");
+    }
+    if (portadaMissing.length > 0) {
+      allMissing.push({ section: "Datos del acopiador", num: "00", id: "identidad", fields: portadaMissing });
+    }
+
     for (const sec of SECTIONS) {
       const missingFields: string[] = [];
       for (const field of sec.required) {
