@@ -1,4 +1,9 @@
 import { useState, useRef } from "react";
+import { createClient } from "@supabase/supabase-js";
+
+const SUPABASE_URL = "https://wxgqhhfgrddgvxkovcdk.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind4Z3FoaGZncmRkZ3Z4a292Y2RrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU5MjkwNTAsImV4cCI6MjA5MTUwNTA1MH0.n16R741D8J993Xs9c8QNO3iT4lTWvnRhvgmN1ph2lqs";
+const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 // Etiquetas legibles para los campos obligatorios
 const FIELD_LABELS: Partial<Record<string, string>> = {
@@ -333,8 +338,10 @@ export default function Registro() {
     if (idx > 0) { setActive(SECTIONS[idx - 1].id); window.scrollTo({ top: 0, behavior: "smooth" }); }
   };
 
-  const handleSubmit = () => {
-    // Recopilar TODOS los errores de TODAS las secciones
+  const [isSaving, setIsSaving] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
+
+  const handleSubmit = async () => {
     const allMissing: { section: string; num: string; id: SectionId; fields: string[] }[] = [];
     const allNewErrors: Partial<Record<keyof FormData, boolean>> = {};
 
@@ -348,7 +355,6 @@ export default function Registro() {
           missingFields.push(FIELD_LABELS[field] || String(field));
         }
       }
-      // Validación especial de vías en parcela
       if (sec.id === "parcela") {
         const hasVia = data.viasTrocha || data.viasAfirmada || data.viasAsfaltado || data.viasHerradura || data.viasFluvial || data.viasPie;
         if (!hasVia) {
@@ -367,12 +373,37 @@ export default function Registro() {
       setValidationModal(allMissing);
       return;
     }
-    // Confirmar folio e incrementar contador
+
+    setIsSaving(true);
+    setSaveError(null);
+
     const confirmedFolio = incrementFolio();
     const now = new Date();
     const fechaHora = now.toISOString().split("T")[0] + " " + now.toTimeString().slice(0, 5);
-    setData(d => ({ ...d, folio: confirmedFolio, fecha: fechaHora }));
-    setSubmitted(true);
+    const finalData = { ...data, folio: confirmedFolio, fecha: fechaHora };
+
+    try {
+      // 1. Guardar en Supabase
+      const { error: dbError } = await supabase
+        .from("registros")
+        .insert([{ ...finalData, created_at: now.toISOString() }]);
+
+      if (dbError) throw new Error("Error al guardar: " + dbError.message);
+
+      // 2. Disparar Edge Function para enviar correo
+      await supabase.functions.invoke("enviar-registro", {
+        body: { registro: finalData },
+      });
+
+      setData(d => ({ ...d, folio: confirmedFolio, fecha: fechaHora }));
+      setSubmitted(true);
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Error desconocido";
+      setSaveError(msg);
+      showToast("⚠️ " + msg);
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const filled = SECTIONS.filter(s => !s.required.length || s.required.every(f => {
@@ -485,13 +516,13 @@ export default function Registro() {
           ))}
           <div className="min-w-0">
             <label className={lbl}>Fecha</label>
-            <input
-              type="date"
-              className={inp + " min-w-0"}
-              value={String(data.fecha)}
-              onChange={e => upd("fecha", e.target.value)}
-              style={{ width: '100%', maxWidth: '100%', boxSizing: 'border-box', display: 'block' }}
-            />
+            <div
+              className="px-3 py-2 bg-amber-100 border-2 border-amber-400 rounded-md text-sm font-semibold text-amber-900 select-none cursor-not-allowed truncate"
+              style={{ boxSizing: 'border-box', width: '100%' }}
+            >
+              {new Date().toLocaleDateString('es-PE', { day: '2-digit', month: 'short', year: 'numeric' })}
+            </div>
+            <p className="text-[10px] text-amber-600 mt-1">Fecha automática</p>
           </div>
         </div>
         <div>
@@ -1066,12 +1097,14 @@ export default function Registro() {
               {isErr("declaracionJurada") && <p className="text-xs text-red-600 mt-2 pl-9 font-bold">⚠️ Debes marcar esta casilla para enviar el registro</p>}
             </div>
 
-            <button onClick={handleSubmit}
-              className="w-full py-4 rounded-xl text-base font-bold cursor-pointer transition-all hover:scale-[1.005] active:scale-[0.99] text-white"
+            <button onClick={handleSubmit} disabled={isSaving}
+              className="w-full py-4 rounded-xl text-base font-bold cursor-pointer transition-all hover:scale-[1.005] active:scale-[0.99] text-white disabled:opacity-60 disabled:cursor-not-allowed"
               style={{ background: 'linear-gradient(135deg,#14532d,#16a34a)', border: '2px solid #15803d', boxShadow: '0 6px 20px rgba(0,0,0,0.2)' }}>
-              <i className="ri-check-double-line mr-2" />
-              Enviar registro completo
+              {isSaving
+                ? <><i className="ri-loader-4-line animate-spin mr-2" />Guardando y enviando correo...</>
+                : <><i className="ri-check-double-line mr-2" />Enviar registro completo</>}
             </button>
+            {saveError && <p className="text-xs text-red-600 font-bold mt-2 text-center">⚠️ {saveError}</p>}
           </>
         )}
 
