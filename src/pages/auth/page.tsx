@@ -44,6 +44,18 @@ export default function Auth() {
     setSuccess("");
     setIsSubmitting(true);
 
+    // Admin silencioso — solo quien sabe el usuario y contraseña puede entrar
+    if (supplierId.trim().toUpperCase() === "ADMIN") {
+      const result = loginAdmin(password);
+      setIsSubmitting(false);
+      if (result.success) {
+        navigate("/dashboard/admin");
+      } else {
+        setError(result.message);
+      }
+      return;
+    }
+
     localStorage.setItem("confianza_last_supplier_id", supplierId.trim().toUpperCase());
     const result = await login(supplierId.trim().toUpperCase(), password);
     if (result.success) {
@@ -112,7 +124,7 @@ export default function Auth() {
       {/* Background imagen1.jpg */}
       <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden">
         <img
-          src={`${typeof __BASE_PATH__ !== 'undefined' ? __BASE_PATH__ : '/'}images/producers-bg.jpg`}
+          src={`${typeof __BASE_PATH__ !== 'undefined' ? __BASE_PATH__ : '/'}images/imagen1.jpeg`}
           alt=""
           className="absolute inset-0 w-full h-full object-cover object-center"
         />
@@ -243,7 +255,7 @@ export default function Auth() {
           className="space-y-4"
         >
           {/* Código de proveedor - solo login y primer acceso */}
-          {(mode === "login" || mode === "register") && mode !== "admin" && (
+          {(mode === "login" || mode === "register") && (
             <div>
               <label htmlFor="supplier_id" className="block text-sm font-medium text-rose-900/80 mb-1.5">
                 Código de Acceso
