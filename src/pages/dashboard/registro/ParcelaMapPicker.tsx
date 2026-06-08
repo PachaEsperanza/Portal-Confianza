@@ -183,19 +183,27 @@ export default function ParcelaMapPicker({ value, onChange }: ParcelaMapPickerPr
   const handleGPS = useCallback(() => {
     if (!navigator.geolocation) return;
     setLocating(true);
+    // Primera llamada: despierta el GPS hardware
     navigator.geolocation.getCurrentPosition(
-      (pos) => {
-        const lat = pos.coords.latitude;
-        const lng = pos.coords.longitude;
-        setLocating(false);
-        if (mapInstanceRef.current) { mapInstanceRef.current.setCenter({ lat, lng }); mapInstanceRef.current.setZoom(17); }
-        if (markerRef.current) { markerRef.current.setPosition({ lat, lng }); markerRef.current.setVisible(true); }
-        const newCoords = { lat, lng, altitud: value?.altitud, perimetroRadio: radioSeleccionado ?? undefined };
-        onChange(newCoords);
-        updateCircle(lat, lng, radioSeleccionado);
+      () => {
+        // Segunda llamada: ahora sí tiene precisión real del GPS
+        navigator.geolocation.getCurrentPosition(
+          (pos) => {
+            const lat = pos.coords.latitude;
+            const lng = pos.coords.longitude;
+            setLocating(false);
+            if (mapInstanceRef.current) { mapInstanceRef.current.setCenter({ lat, lng }); mapInstanceRef.current.setZoom(17); }
+            if (markerRef.current) { markerRef.current.setPosition({ lat, lng }); markerRef.current.setVisible(true); }
+            const newCoords = { lat, lng, altitud: value?.altitud, perimetroRadio: radioSeleccionado ?? undefined };
+            onChange(newCoords);
+            updateCircle(lat, lng, radioSeleccionado);
+          },
+          () => setLocating(false),
+          { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
+        );
       },
       () => setLocating(false),
-      { enableHighAccuracy: true, timeout: 10000 }
+      { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 }
     );
   }, [onChange, value, radioSeleccionado, updateCircle]);
 
@@ -306,10 +314,11 @@ export default function ParcelaMapPicker({ value, onChange }: ParcelaMapPickerPr
             <p className="text-sm font-black text-emerald-800">{value.lng.toFixed(6)}°</p>
           </div>
           <div>
-            <p className="text-[10px] font-bold text-stone-600 uppercase tracking-wide mb-1">Altitud (msnm)</p>
+            <p className="text-[10px] font-bold text-stone-600 uppercase tracking-wide mb-1">Altitud (msnm)<span className="text-red-500 ml-0.5">*</span></p>
             <input type="number" placeholder="Ej. 1100" value={value.altitud || ''}
               onChange={e => onChange({ ...value, altitud: e.target.value })}
-              className="w-full px-3 py-2 bg-white border border-stone-300 rounded-md text-sm font-medium text-stone-800 focus:outline-none focus:ring-2 focus:ring-emerald-500/40 focus:border-emerald-500" />
+              className={`w-full px-3 py-2 bg-white rounded-md text-sm font-medium text-stone-800 focus:outline-none focus:ring-2 focus:ring-emerald-500/40 focus:border-emerald-500 border ${!value.altitud ? 'border-red-400' : 'border-stone-300'}`} />
+            {!value.altitud && <p className="text-[11px] text-red-500 mt-1 font-medium">Obligatoria</p>}
           </div>
         </div>
       ) : (

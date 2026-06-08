@@ -80,7 +80,7 @@ const MESES = ["Ene","Feb","Mar","Abr","May","Jun","Jul","Ago","Sep","Oct","Nov"
 
 const SECTIONS: { id: SectionId; num: string; title: string; icon: string; required: (keyof FormData)[] }[] = [
   { id: "identidad",    num: "01", title: "Identidad del Productor",      icon: "ri-user-line",           required: ["nombre","dni","telefono","comunidad","distrito","fotoProductor"] },
-  { id: "parcela",      num: "02", title: "Parcela y Georreferenciación", icon: "ri-map-pin-line",         required: ["nombreParcela","superficieTotal","areaCacao","fuenteHidrica"] },
+  { id: "parcela",      num: "02", title: "Parcela y Georreferenciación", icon: "ri-map-pin-line",         required: ["nombreParcela","superficieTotal","areaCacao","fuenteHidrica","parcelaCoords"] },
   { id: "cultivo",      num: "03", title: "Características del Cultivo",  icon: "ri-plant-line",           required: ["edadPlantas","distanciamiento","gradosBrix"] },
   { id: "produccion",   num: "04", title: "Producción y Cosecha",         icon: "ri-shopping-basket-line", required: ["estimadoAnual","tipoAcopio"] },
   { id: "sanidad",      num: "05", title: "Sanidad Vegetal",              icon: "ri-shield-line",          required: ["plagaPrincipal","pctAfectacionPrincipal"] },
@@ -398,6 +398,11 @@ export default function Registro() {
         if (!hasVia) {
           allNewErrors["viasTrocha"] = true;
           missingFields.push(FIELD_LABELS["viasTrocha"] || "Vía de acceso");
+        }
+        if (!data.parcelaCoords) {
+          missingFields.push("Ubicación en el mapa (sección 2.4)");
+        } else if (!data.parcelaCoords.altitud) {
+          missingFields.push("Altitud de la parcela (msnm)");
         }
       }
       if (missingFields.length > 0) {

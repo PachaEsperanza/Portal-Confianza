@@ -302,24 +302,40 @@ export default function AdminPanel() {
             </button>
           </div>
 
-          {/* Fotos */}
-          {(selected.foto_productor || selected.foto_acopiador_productor) && (
+          {/* Foto del productor */}
+          {selected.foto_productor && (
             <div className="rounded-xl bg-amber-50 border border-amber-200 p-5">
-              <p className="text-[10px] font-bold text-amber-700 uppercase tracking-widest mb-4">Fotografías</p>
-              <div className="flex flex-wrap gap-4 justify-center">
-                {selected.foto_productor && (
-                  <div className="text-center">
-                    <img src={String(selected.foto_productor)} alt="Productor" className="w-44 h-44 object-cover rounded-xl border-2 border-amber-300" />
-                    <p className="text-xs font-bold text-amber-700 mt-2">Foto del productor</p>
-                  </div>
-                )}
-                {selected.foto_acopiador_productor && (
-                  <div className="text-center">
-                    <img src={String(selected.foto_acopiador_productor)} alt="Conjunto" className="h-44 object-cover rounded-xl border-2 border-amber-300" />
-                    <p className="text-xs font-bold text-amber-700 mt-2">Acopiador con productor</p>
-                  </div>
-                )}
+              <p className="text-[10px] font-bold text-amber-700 uppercase tracking-widest mb-4">📸 Foto del productor</p>
+              <div className="flex justify-center">
+                <div className="text-center">
+                  <img src={String(selected.foto_productor)} alt="Productor" className="w-64 h-64 object-cover rounded-xl border-2 border-amber-300 shadow-md" />
+                  <p className="text-sm font-bold text-stone-700 mt-2">{String(selected.nombre || "")}</p>
+                  <p className="text-xs text-stone-500">{String(selected.comunidad || "")} · {String(selected.distrito || "")}</p>
+                </div>
               </div>
+            </div>
+          )}
+
+          {/* Foto acopiador con productor */}
+          {selected.foto_acopiador_productor && (
+            <div className="rounded-xl bg-amber-50 border border-amber-200 p-5">
+              <p className="text-[10px] font-bold text-amber-700 uppercase tracking-widest mb-4">📸 Acopiador con el productor</p>
+              <div className="flex justify-center">
+                <img src={String(selected.foto_acopiador_productor)} alt="Conjunto" className="max-w-full w-full rounded-xl border-2 border-amber-300 shadow-md" style={{ maxHeight: 340, objectFit: 'cover' }} />
+              </div>
+            </div>
+          )}
+
+          {/* Video del productor */}
+          {selected.video_productor && (
+            <div className="rounded-xl bg-amber-50 border border-amber-200 p-5">
+              <p className="text-[10px] font-bold text-amber-700 uppercase tracking-widest mb-4">🎥 Video de presentación del productor</p>
+              <video
+                src={String(selected.video_productor)}
+                controls
+                className="w-full rounded-xl border-2 border-amber-300 shadow-md"
+                style={{ maxHeight: 420 }}
+              />
             </div>
           )}
 
