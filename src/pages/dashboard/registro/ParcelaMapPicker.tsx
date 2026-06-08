@@ -183,40 +183,29 @@ export default function ParcelaMapPicker({ value, onChange }: ParcelaMapPickerPr
   const handleGPS = useCallback(() => {
     if (!navigator.geolocation) return;
     setLocating(true);
-
-    const placeMarker = (lat: number, lng: number) => {
-      setLocating(false);
-      if (mapInstanceRef.current) { mapInstanceRef.current.setCenter({ lat, lng }); mapInstanceRef.current.setZoom(17); }
-      if (markerRef.current) { markerRef.current.setPosition({ lat, lng }); markerRef.current.setVisible(true); }
-      const newCoords = { lat, lng, altitud: value?.altitud, perimetroRadio: radioSeleccionado ?? undefined };
-      onChange(newCoords);
-      updateCircle(lat, lng, radioSeleccionado);
-    };
-
-    // Usar watchPosition para obtener la primera lectura de alta precisión
-    const watchId = navigator.geolocation.watchPosition(
-      (pos) => {
-        navigator.geolocation.clearWatch(watchId);
-        placeMarker(pos.coords.latitude, pos.coords.longitude);
-      },
-      (err) => {
-        navigator.geolocation.clearWatch(watchId);
-        // Fallback: intentar con baja precisión
+    // Primera llamada: despierta el GPS hardware
+    navigator.geolocation.getCurrentPosition(
+      () => {
+        // Segunda llamada: ahora sí tiene precisión real del GPS
         navigator.geolocation.getCurrentPosition(
-          (pos) => placeMarker(pos.coords.latitude, pos.coords.longitude),
-          () => { setLocating(false); alert("No se pudo obtener tu ubicación. Asegúrate de tener el GPS activado y los permisos concedidos."); },
-          { enableHighAccuracy: false, timeout: 10000, maximumAge: 30000 }
+          (pos) => {
+            const lat = pos.coords.latitude;
+            const lng = pos.coords.longitude;
+            setLocating(false);
+            if (mapInstanceRef.current) { mapInstanceRef.current.setCenter({ lat, lng }); mapInstanceRef.current.setZoom(17); }
+            if (markerRef.current) { markerRef.current.setPosition({ lat, lng }); markerRef.current.setVisible(true); }
+            const newCoords = { lat, lng, altitud: value?.altitud, perimetroRadio: radioSeleccionado ?? undefined };
+            onChange(newCoords);
+            updateCircle(lat, lng, radioSeleccionado);
+          },
+          () => setLocating(false),
+          { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
         );
       },
-      { enableHighAccuracy: true, timeout: 20000, maximumAge: 0 }
+      () => setLocating(false),
+      { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 }
     );
-
-    // Safety timeout por si watchPosition nunca responde
-    setTimeout(() => {
-      navigator.geolocation.clearWatch(watchId);
-      if (locating) setLocating(false);
-    }, 22000);
-  }, [onChange, value, radioSeleccionado, updateCircle, locating]);
+  }, [onChange, value, radioSeleccionado, updateCircle]);
 
   const MAP_TYPES: { id: MapTypeId; label: string; icon: string }[] = [
     { id: 'roadmap', label: 'Mapa', icon: 'ri-road-map-line' },
@@ -268,6 +257,9 @@ export default function ParcelaMapPicker({ value, onChange }: ParcelaMapPickerPr
           ? <><span className="animate-spin w-4 h-4 border-2 border-emerald-400 border-t-emerald-700 rounded-full" />Obteniendo ubicación GPS...</>
           : <><i className="ri-focus-3-line" />Usar mi ubicación GPS actual</>}
       </button>
+      <p className="text-[11px] text-stone-500 text-center font-medium">
+        💡 Para mayor precisión, toca el botón <strong>2 veces</strong> — la segunda lectura ubica el punto exacto.
+      </p>
 
       {/* Map */}
       <div className="relative w-full rounded-xl overflow-hidden border-2 border-stone-300" style={{ height: 340 }}>
