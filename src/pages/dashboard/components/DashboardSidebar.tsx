@@ -215,7 +215,7 @@ export default function DashboardSidebar() {
               ))}
             </nav>
 
-            <div className="px-4 py-4 border-t border-rose-300/30">
+            <div className="px-4 py-4 border-t border-rose-300/30 space-y-3">
               <div className="flex items-center gap-3">
                 <div className="w-8 h-8 rounded-full bg-rose-100 flex items-center justify-center text-sm font-semibold text-rose-800">
                   {user?.name?.charAt(0) || "P"}
@@ -225,6 +225,13 @@ export default function DashboardSidebar() {
                   <p className="text-xs font-medium text-rose-200/80">{user?.supplier_id}</p>
                 </div>
               </div>
+              <button
+                onClick={() => { logout(); navigate("/auth"); setMobileOpen(false); }}
+                className="w-full flex items-center gap-2 px-3 py-2.5 rounded-md text-sm font-bold text-rose-200 hover:bg-rose-900/50 hover:text-white transition-all cursor-pointer"
+              >
+                <i className="ri-logout-box-line" />
+                Cerrar sesión
+              </button>
             </div>
           </div>
         </div>
