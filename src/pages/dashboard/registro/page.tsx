@@ -159,19 +159,37 @@ function Toast({ msg, onClose }: { msg: string; onClose: () => void }) {
   );
 }
 
-// ─── MEDIA UPLOAD ─────────────────────────────────────────────────────────────
-function MediaUpload({ label, accept, value, onChange, required, icon, hint, capture }: {
+// ─── MEDIA UPLOAD — sube a Supabase Storage, guarda URL pública ──────────────
+function MediaUpload({ label, accept, value, onChange, required, icon, hint, capture, storageBucket, storageFolder }: {
   label: string; accept: string; value: string; onChange: (v: string) => void;
   required?: boolean; icon: string; hint: string; capture?: string;
+  storageBucket?: string; storageFolder?: string;
 }) {
   const ref = useRef<HTMLInputElement>(null);
+  const [uploading, setUploading] = useState(false);
+  const [uploadErr, setUploadErr] = useState("");
   const isVideo = accept.includes("video");
-  const handleFile = (e: React.ChangeEvent<HTMLInputElement>) => {
+
+  const handleFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    const reader = new FileReader();
-    reader.onload = () => onChange(String(reader.result));
-    reader.readAsDataURL(file);
+    const bucket = storageBucket || "registros-media";
+    const folder = storageFolder || "misc";
+    const ext = file.name.split(".").pop() || (isVideo ? "mp4" : "jpg");
+    const path = `${folder}/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
+    setUploading(true);
+    setUploadErr("");
+    try {
+      const { error } = await supabase.storage.from(bucket).upload(path, file, { upsert: false });
+      if (error) throw error;
+      const { data: pub } = supabase.storage.from(bucket).getPublicUrl(path);
+      onChange(pub.publicUrl);
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Error al subir archivo";
+      setUploadErr(msg);
+    } finally {
+      setUploading(false);
+    }
   };
   return (
     <div>
@@ -179,12 +197,19 @@ function MediaUpload({ label, accept, value, onChange, required, icon, hint, cap
       {!value && (
         <p className={guide}><i className="ri-arrow-down-line" /> 👆 Toca aquí para {isVideo ? "grabar o subir un video" : "tomar una foto o subir imagen"}</p>
       )}
+      {uploadErr && <p className="text-[11px] text-red-500 mb-1">{uploadErr}</p>}
       <div
-        onClick={() => ref.current?.click()}
-        className={`relative flex flex-col items-center justify-center gap-3 p-5 rounded-xl border-2 border-dashed cursor-pointer transition-all min-h-[140px] ${value ? "border-green-500 bg-green-50" : "border-amber-400 bg-amber-50 hover:border-amber-600 hover:bg-amber-100"}`}
+        onClick={() => !uploading && ref.current?.click()}
+        className={`relative flex flex-col items-center justify-center gap-3 p-5 rounded-xl border-2 border-dashed transition-all min-h-[140px] ${uploading ? "border-blue-300 bg-blue-50 cursor-wait" : value ? "border-green-500 bg-green-50 cursor-pointer" : "border-amber-400 bg-amber-50 hover:border-amber-600 hover:bg-amber-100 cursor-pointer"}`}
       >
         <input ref={ref} type="file" accept={accept} capture={capture as "environment" | "user" | undefined} onChange={handleFile} className="hidden" />
-        {value ? (
+        {uploading ? (
+          <div className="flex flex-col items-center gap-2">
+            <div className="w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
+            <p className="text-sm font-bold text-blue-600">Subiendo archivo...</p>
+            <p className="text-[11px] text-blue-400">Espera un momento</p>
+          </div>
+        ) : value ? (
           isVideo
             ? <video src={value} className="max-h-36 rounded-lg" controls />
             : <img src={value} alt="" className="max-h-36 rounded-lg object-cover" />
@@ -716,9 +741,11 @@ export default function Registro() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <MediaUpload label="Foto del productor" accept="image/*" value={data.fotoProductor}
                 onChange={v => upd("fotoProductor", v)} required icon="ri-camera-line"
+                storageBucket="registros-media" storageFolder="fotos-productor"
                 hint="Toca aquí → toma la foto directamente. Rostro visible, buena luz." capture="environment" />
               <MediaUpload label="Video breve de presentación (opcional)" accept="video/*" value={data.videoProductor}
                 onChange={v => upd("videoProductor", v)} icon="ri-video-line"
+                storageBucket="registros-media" storageFolder="videos-productor"
                 hint="Graba un video corto donde el productor se presente con sus propias palabras." capture="environment" />
             </div>
 
@@ -1203,16 +1230,19 @@ export default function Registro() {
               <div className="space-y-4">
                 <p className={sublbl}>Firma del productor</p>
                 <MediaUpload label="Foto de la firma del productor" accept="image/*" value={data.firmaProductor}
+                storageBucket="registros-media" storageFolder="firmas"
                   onChange={v => upd("firmaProductor", v)} required icon="ri-pen-nib-line"
                   hint="Toma foto de la firma manuscrita sobre papel" />
                 {isErr("firmaProductor") && <p className="text-xs text-red-600 font-bold">⚠️ La firma del productor es obligatoria</p>}
                 <MediaUpload label="Foto de la huella digital (opcional)" accept="image/*" value={data.huellaProductor}
+                storageBucket="registros-media" storageFolder="huellas"
                   onChange={v => upd("huellaProductor", v)} icon="ri-fingerprint-line"
                   hint="Toma foto de la huella dactilar del productor" />
               </div>
               <div className="space-y-4">
                 <p className={sublbl}>Firma del acopiador responsable</p>
                 <MediaUpload label="Foto de la firma del acopiador" accept="image/*" value={data.firmaAcopiador}
+                storageBucket="registros-media" storageFolder="firmas"
                   onChange={v => upd("firmaAcopiador", v)} required icon="ri-pen-nib-line"
                   hint="Foto de la firma del acopiador que levantó la ficha" />
                 {isErr("firmaAcopiador") && <p className="text-xs text-red-600 font-bold">⚠️ La firma del acopiador es obligatoria</p>}
