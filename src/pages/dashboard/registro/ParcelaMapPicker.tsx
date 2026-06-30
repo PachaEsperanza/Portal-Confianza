@@ -23,7 +23,7 @@ interface ParcelaMapPickerProps {
   onChange: (coords: ParcelaCoords) => void;
 }
 
-const GMAPS_KEY = 'AIzaSyAEgkpN1aI0tna5cwQ6yGE9_k2HsMfHV2o';
+const GMAPS_KEY = import.meta.env.VITE_GOOGLE_MAPS_KEY ?? '';
 
 let scriptLoaded = false;
 let scriptLoading = false;
