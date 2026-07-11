@@ -31,7 +31,7 @@ export default function AdminLayout() {
           </div>
           <div>
             <p className="text-[10px] text-amber-300 font-bold uppercase tracking-widest">Panel Administrador</p>
-            <p className="text-xs text-amber-100 font-medium">Comparto tu Esperanza</p>
+            <p className="text-xs text-amber-100 font-medium" style={{ fontFamily: "'Josefin Sans', sans-serif", letterSpacing: '0.1em' }}>PΛCHΛ ESPERANZA</p>
           </div>
         </div>
         <button onClick={() => { logout(); navigate("/auth"); }}

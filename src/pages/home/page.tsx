@@ -23,7 +23,7 @@ export default function Home() {
       <nav className="relative z-10 w-full flex items-center justify-between px-6 md:px-12 py-5">
         <div className="flex items-center gap-3">
           <img
-            src="https://public.readdy.ai/ai/img_res/c99949a7-105a-4e7e-b54f-999d11a6f167.png"
+            src={`${basePath}images/hoja.png`.replace('//', '/')}
             alt="Logo"
             className="h-10 w-auto"
           />
@@ -43,18 +43,16 @@ export default function Home() {
               Portal Miembros de la Familia
             </span>
             <span
-              className="leading-none mt-0.5"
+              className="leading-none mt-0.5 uppercase"
               style={{
+                fontFamily: "'Josefin Sans', sans-serif",
+                fontWeight: 100,
                 color: '#5C1422',
-                fontFamily: "'Playfair Display', serif",
-                fontWeight: 800,
                 fontSize: '0.65rem',
-                letterSpacing: '0.05em',
-                WebkitTextStroke: '0.25px #5C1422',
-                filter: 'drop-shadow(0 0 6px rgba(255,255,255,0.7))',
+                letterSpacing: '0.2em',
               }}
             >
-              Comparto tu Esperanza
+              PΛCHΛ ESPERANZA
             </span>
           </div>
         </div>
@@ -73,22 +71,28 @@ export default function Home() {
                 filter: 'drop-shadow(0 2px 8px rgba(0,0,0,0.5))',
               }}
             />
-            <h1
-              className="uppercase leading-[0.95]"
-              style={{
-                color: '#E8C93A',
-                fontFamily: "'Playfair Display', serif",
-                fontWeight: 950,
-                fontSize: 'clamp(2rem, 5vw, 3.6rem)',
-                letterSpacing: '-0.01em',
-                WebkitTextStroke: '0.8px #D4AF20',
-                filter: 'drop-shadow(0 0 22px rgba(232,201,58,0.65)) drop-shadow(0 2px 10px rgba(0,0,0,0.7))',
-                margin: 0,
-                textShadow: '0 0 40px rgba(232,201,58,0.4)',
-              }}
-            >
-              COMPARTO <em style={{ fontStyle: 'italic', textTransform: 'lowercase', fontSize: '0.72em', fontWeight: 800, letterSpacing: '0.01em', verticalAlign: 'middle' }}>tu</em> ESPERANZA
-            </h1>
+            <div className="flex flex-col items-center">
+              <span style={{
+                display: 'block',
+                fontFamily: "'Josefin Sans', sans-serif",
+                fontSize: 'clamp(3rem,8vw,6.5rem)',
+                fontWeight: 100,
+                letterSpacing: '0.3em',
+                lineHeight: 1,
+                color: '#FFD700',
+              }}>PΛCHΛ</span>
+              <span style={{
+                display: 'block',
+                fontFamily: "'Josefin Sans', sans-serif",
+                fontSize: 'clamp(0.9rem,2.2vw,1.8rem)',
+                fontWeight: 100,
+                letterSpacing: '0.55em',
+                color: '#FFD700',
+                textTransform: 'uppercase',
+                marginTop: '0.15em',
+                lineHeight: 1,
+              }}>ESPERANZA</span>
+            </div>
           </div>
           <p
             className="animate-fade-in-up delay-200"

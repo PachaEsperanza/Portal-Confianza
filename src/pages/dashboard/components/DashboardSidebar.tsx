@@ -2,6 +2,8 @@ import { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 
+declare const __BASE_PATH__: string;
+
 const menuItems = [
   { path: "/dashboard/registro", label: "Registro", icon: "ri-edit-line" },
   { path: "/dashboard/profile", label: "Perfil", icon: "ri-user-settings-line" },
@@ -21,7 +23,7 @@ export default function DashboardSidebar() {
       <div className="lg:hidden fixed top-0 left-0 right-0 z-[70] bg-black/55 backdrop-blur-md border-b border-rose-300/40 px-4 py-3 flex items-center justify-between">
         <div className="flex items-center gap-2">
           <img
-            src="https://public.readdy.ai/ai/img_res/c99949a7-105a-4e7e-b54f-999d11a6f167.png"
+            src={`${typeof __BASE_PATH__ !== "undefined" ? __BASE_PATH__ : "/"}images/hoja.png`}
             alt="Logo"
             className="h-7 w-auto"
           />
@@ -29,15 +31,14 @@ export default function DashboardSidebar() {
             <span
               className="leading-none uppercase"
               style={{
-                color: '#FECDD3',
-                fontFamily: "'Playfair Display', serif",
-                fontWeight: 950,
+                fontFamily: "'Josefin Sans', sans-serif",
+                fontWeight: 100,
+                color: '#FFD700',
                 fontSize: '0.85rem',
-                letterSpacing: '0.04em',
-                filter: 'drop-shadow(0 1px 3px rgba(0,0,0,0.6))',
+                letterSpacing: '0.15em',
               }}
             >
-              Comparto tu Esperanza
+              PΛCHΛ ESPERANZA
             </span>
             <span
               className="leading-none mt-0.5 uppercase"
@@ -69,7 +70,7 @@ export default function DashboardSidebar() {
         <div className="px-6 py-5 border-b border-rose-300/30">
           <div className="flex items-center gap-3">
             <img
-              src="https://public.readdy.ai/ai/img_res/c99949a7-105a-4e7e-b54f-999d11a6f167.png"
+              src={`${typeof __BASE_PATH__ !== "undefined" ? __BASE_PATH__ : "/"}images/hoja.png`}
               alt="Logo"
               className="h-8 w-auto"
             />
@@ -77,15 +78,14 @@ export default function DashboardSidebar() {
               <span
                 className="leading-none uppercase"
                 style={{
-                  color: '#FECDD3',
-                  fontFamily: "'Playfair Display', serif",
-                  fontWeight: 950,
+                  fontFamily: "'Josefin Sans', sans-serif",
+                  fontWeight: 100,
+                  color: '#FFD700',
                   fontSize: '0.95rem',
-                  letterSpacing: '0.05em',
-                  textShadow: '0 0 12px rgba(254,205,211,0.45), 0 2px 6px rgba(0,0,0,0.6)',
+                  letterSpacing: '0.15em',
                 }}
               >
-                Comparto tu Esperanza
+                PΛCHΛ ESPERANZA
               </span>
               <span
                 className="leading-none mt-1"
@@ -152,7 +152,7 @@ export default function DashboardSidebar() {
             <div className="px-4 py-4 border-b border-rose-300/30 flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <img
-                  src="https://public.readdy.ai/ai/img_res/c99949a7-105a-4e7e-b54f-999d11a6f167.png"
+                  src={`${typeof __BASE_PATH__ !== "undefined" ? __BASE_PATH__ : "/"}images/hoja.png`}
                   alt="Logo"
                   className="h-7 w-auto"
                 />
@@ -160,15 +160,14 @@ export default function DashboardSidebar() {
             <span
               className="leading-none uppercase"
               style={{
-                color: '#FECDD3',
-                fontFamily: "'Playfair Display', serif",
-                fontWeight: 950,
+                fontFamily: "'Josefin Sans', sans-serif",
+                fontWeight: 100,
+                color: '#FFD700',
                 fontSize: '0.85rem',
-                letterSpacing: '0.04em',
-                filter: 'drop-shadow(0 1px 3px rgba(0,0,0,0.6))',
+                letterSpacing: '0.15em',
               }}
             >
-              Comparto tu Esperanza
+              PΛCHΛ ESPERANZA
             </span>
             <span
               className="leading-none mt-0.5 uppercase"

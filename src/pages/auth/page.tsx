@@ -138,20 +138,31 @@ export default function Auth() {
           alt="Logo"
           className="h-14 w-auto"
         />
-        <div className="flex flex-col items-start">
+        <div className="flex flex-col items-center">
           <span
             className="uppercase leading-none"
             style={{
-              color: '#CC0000',
-              fontFamily: "'Playfair Display', serif",
-              fontWeight: 950,
-              fontSize: '1.6rem',
-              letterSpacing: '0.06em',
-              WebkitTextStroke: '0.5px #CC0000',
-              filter: 'drop-shadow(0 1px 5px rgba(0,0,0,0.35))',
+              fontFamily: "'Josefin Sans', sans-serif",
+              fontWeight: 100,
+              fontSize: 'clamp(1.6rem, 4vw, 2.4rem)',
+              letterSpacing: '0.25em',
+              color: '#FFD700',
+              lineHeight: 1,
             }}
           >
-            Comparto tu Esperanza
+            PΛCHΛ
+          </span>
+          <span
+            className="uppercase leading-none mt-1"
+            style={{
+              fontFamily: "'Josefin Sans', sans-serif",
+              fontWeight: 100,
+              fontSize: 'clamp(0.6rem, 1.4vw, 0.9rem)',
+              letterSpacing: '0.55em',
+              color: '#FFD700',
+            }}
+          >
+            ESPERANZA
           </span>
           <span
             className="mt-2 inline-block"
