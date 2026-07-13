@@ -74,12 +74,15 @@ interface FormData {
   confiabilidad: string; calidadGrano: string; potencialEstrategico: string;
   riesgoPerdida: string; accionFidelizacion: string; fechaSeguimiento: string; notasConfidenciales: string;
   firmaProductor: string; huellaProductor: string; firmaAcopiador: string; fechaLugar: string; declaracionJurada: boolean; dniAcopiador: string; provincia: string; tieneTitulo: string; fotoAcopiadorProductor: string;
+  numeroHijos: string; tieneConyuge: string; fechasCumpleanosFamilia: string;
+  tieneEnfermedadDiscapacidad: string; detalleEnfermedadDiscapacidad: string;
+  emergenciasFamiliares: string; usoDineroActual: string; destinoFondoFamiliar: string;
 }
 
 const MESES = ["Ene","Feb","Mar","Abr","May","Jun","Jul","Ago","Sep","Oct","Nov","Dic"];
 
 const SECTIONS: { id: SectionId; num: string; title: string; icon: string; required: (keyof FormData)[] }[] = [
-  { id: "identidad",    num: "01", title: "Identidad del Productor",      icon: "ri-user-line",           required: ["nombre","dni","telefono","comunidad","distrito","fotoProductor"] },
+  { id: "identidad",    num: "01", title: "Identidad del Productor",      icon: "ri-user-line",           required: ["nombre","dni","telefono","comunidad","distrito","fotoProductor","numeroHijos","tieneConyuge","fechasCumpleanosFamilia","tieneEnfermedadDiscapacidad","emergenciasFamiliares","usoDineroActual","destinoFondoFamiliar"] },
   { id: "parcela",      num: "02", title: "Parcela y Georreferenciación", icon: "ri-map-pin-line",         required: ["nombreParcela","superficieTotal","areaCacao","fuenteHidrica","parcelaCoords"] },
   { id: "cultivo",      num: "03", title: "Características del Cultivo",  icon: "ri-plant-line",           required: ["edadPlantas","distanciamiento","gradosBrix"] },
   { id: "produccion",   num: "04", title: "Producción y Cosecha",         icon: "ri-shopping-basket-line", required: ["estimadoAnual","tipoAcopio"] },
@@ -132,6 +135,9 @@ const init: FormData = {
   comentariosProductor:"",
   confiabilidad:"", calidadGrano:"", potencialEstrategico:"", riesgoPerdida:"", accionFidelizacion:"", fechaSeguimiento:"", notasConfidenciales:"",
   firmaProductor:"", huellaProductor:"", firmaAcopiador:"", fechaLugar:"", declaracionJurada:false, dniAcopiador:"", provincia:"", tieneTitulo:"", fotoAcopiadorProductor:"",
+  numeroHijos:"", tieneConyuge:"", fechasCumpleanosFamilia:"",
+  tieneEnfermedadDiscapacidad:"", detalleEnfermedadDiscapacidad:"",
+  emergenciasFamiliares:"", usoDineroActual:"", destinoFondoFamiliar:"",
 };
 
 // ─── CREMA STYLE HELPERS ─────────────────────────────────────────────────────
@@ -880,6 +886,69 @@ export default function Registro() {
               <label className={lbl}>¿Cuál es el sueño más grande que quiere cumplir para su familia?</label>
               <p className="text-[11px] text-stone-500 mb-1">Escribe con tus propias palabras</p>
               <textarea rows={3} className={inp} placeholder="Ej: Construir mi casa, dar estudios a mis hijos, tener una chacra propia más grande..." value={data.justificacionTier} onChange={e => upd("justificacionTier", e.target.value)} />
+            </div>
+
+            <p className={sublbl}>1.5 — Familia, salud y economía del hogar</p>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className={lbl}>Número de hijos{reqStar}</label>
+                <select className={I("numeroHijos")} style={selectStyle} value={data.numeroHijos} onChange={e => upd("numeroHijos", e.target.value)}>
+                  <option value="">👇 Selecciona una opción</option>
+                  <option value="0">0 — No tiene hijos</option>
+                  <option value="1">1 hijo</option>
+                  <option value="2">2 hijos</option>
+                  <option value="3">3 hijos</option>
+                  <option value="4">4 hijos</option>
+                  <option value="5">5 hijos</option>
+                  <option value="6+">6 o más hijos</option>
+                </select>
+                {isErr("numeroHijos") && <p className="text-xs text-red-600 mt-1 font-bold">⚠️ Selecciona el número de hijos</p>}
+              </div>
+              <div>
+                <label className={lbl}>¿Tiene esposa/o o conviviente?{reqStar}</label>
+                <select className={I("tieneConyuge")} style={selectStyle} value={data.tieneConyuge} onChange={e => upd("tieneConyuge", e.target.value)}>
+                  <option value="">👇 Selecciona una opción</option>
+                  <option value="Sí">Sí</option>
+                  <option value="No">No</option>
+                </select>
+                {isErr("tieneConyuge") && <p className="text-xs text-red-600 mt-1 font-bold">⚠️ Selecciona una opción</p>}
+              </div>
+              <div className="md:col-span-2">
+                <label className={lbl}>Cumpleaños de hijos y esposa/o o conviviente{reqStar}</label>
+                <p className="text-[11px] text-stone-500 mb-1">Escribe el nombre y la fecha de cada uno. Ej: María (hija) — 14 de marzo; Juan (esposo) — 2 de julio</p>
+                <textarea rows={2} className={I("fechasCumpleanosFamilia")} placeholder="Nombre — fecha de cumpleaños de cada hijo/a y de su esposa/o" value={data.fechasCumpleanosFamilia} onChange={e => upd("fechasCumpleanosFamilia", e.target.value)} />
+                {isErr("fechasCumpleanosFamilia") && <p className="text-xs text-red-600 mt-1 font-bold">⚠️ Escribe los cumpleaños de tu familia</p>}
+              </div>
+              <div>
+                <label className={lbl}>¿Alguien de la familia tiene alguna enfermedad o discapacidad?{reqStar}</label>
+                <select className={I("tieneEnfermedadDiscapacidad")} style={selectStyle} value={data.tieneEnfermedadDiscapacidad} onChange={e => upd("tieneEnfermedadDiscapacidad", e.target.value)}>
+                  <option value="">👇 Selecciona una opción</option>
+                  <option value="Sí">Sí</option>
+                  <option value="No">No</option>
+                </select>
+                {isErr("tieneEnfermedadDiscapacidad") && <p className="text-xs text-red-600 mt-1 font-bold">⚠️ Selecciona una opción</p>}
+              </div>
+              {data.tieneEnfermedadDiscapacidad === "Sí" && (
+                <div>
+                  <label className={lbl}>¿Cuál? <span className="text-stone-400 font-normal">(opcional)</span></label>
+                  <input className={inp} placeholder="Describe brevemente" value={data.detalleEnfermedadDiscapacidad} onChange={e => upd("detalleEnfermedadDiscapacidad", e.target.value)} />
+                </div>
+              )}
+              <div className="md:col-span-2">
+                <label className={lbl}>Emergencias familiares o dificultades que enfrenta actualmente{reqStar}</label>
+                <textarea rows={2} className={I("emergenciasFamiliares")} placeholder="Ej: deudas, salud, vivienda, algún problema urgente..." value={data.emergenciasFamiliares} onChange={e => upd("emergenciasFamiliares", e.target.value)} />
+                {isErr("emergenciasFamiliares") && <p className="text-xs text-red-600 mt-1 font-bold">⚠️ Este campo es obligatorio</p>}
+              </div>
+              <div>
+                <label className={lbl}>¿En qué se usa el dinero que ya gana con su cultivo?{reqStar}</label>
+                <input className={I("usoDineroActual")} placeholder="Ej: alimentación, estudios, vivienda..." value={data.usoDineroActual} onChange={e => upd("usoDineroActual", e.target.value)} />
+                {isErr("usoDineroActual") && <p className="text-xs text-red-600 mt-1 font-bold">⚠️ Este campo es obligatorio</p>}
+              </div>
+              <div>
+                <label className={lbl}>¿A dónde va el fondo familiar? (cuidados, medicinas, cultivo){reqStar}</label>
+                <input className={I("destinoFondoFamiliar")} placeholder="Ej: medicinas, cuidado de hijos, insumos del cultivo..." value={data.destinoFondoFamiliar} onChange={e => upd("destinoFondoFamiliar", e.target.value)} />
+                {isErr("destinoFondoFamiliar") && <p className="text-xs text-red-600 mt-1 font-bold">⚠️ Este campo es obligatorio</p>}
+              </div>
             </div>
           </>
         )}
