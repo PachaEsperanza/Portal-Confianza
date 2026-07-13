@@ -63,7 +63,7 @@ export default function Home() {
         <div className="max-w-3xl">
           <div className="animate-fade-in-up flex items-center justify-start gap-4 mb-4 flex-wrap">
             <div className="flex flex-col items-start">
-              <div className="flex items-end gap-4">
+              <div className="flex items-end gap-1">
                 <span style={{
                   display: 'block',
                   fontFamily: "'Josefin Sans', sans-serif",
@@ -80,6 +80,7 @@ export default function Home() {
                   style={{
                     height: 'clamp(3.5rem, 8vw, 6.5rem)',
                     width: 'auto',
+                    marginLeft: '-0.75rem',
                     filter: 'drop-shadow(0 2px 8px rgba(0,0,0,0.5))',
                   }}
                 />
