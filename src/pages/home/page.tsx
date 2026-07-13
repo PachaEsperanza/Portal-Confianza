@@ -63,16 +63,27 @@ export default function Home() {
         <div className="max-w-3xl">
           <div className="animate-fade-in-up flex items-center justify-start gap-4 mb-4 flex-wrap">
             <div className="flex flex-col items-start">
-              <span style={{
-                display: 'block',
-                fontFamily: "'Josefin Sans', sans-serif",
-                fontSize: 'clamp(2.6rem,7vw,5.7rem)',
-                fontWeight: 100,
-                letterSpacing: '0.3em',
-                lineHeight: 1,
-                color: '#FF1E1E',
-                textShadow: '0 2px 10px rgba(0,0,0,0.55)',
-              }}>PΛCHΛ</span>
+              <div className="flex items-end gap-4">
+                <span style={{
+                  display: 'block',
+                  fontFamily: "'Josefin Sans', sans-serif",
+                  fontSize: 'clamp(2.6rem,7vw,5.7rem)',
+                  fontWeight: 100,
+                  letterSpacing: '0.3em',
+                  lineHeight: 1,
+                  color: '#FF1E1E',
+                  textShadow: '0 2px 10px rgba(0,0,0,0.55)',
+                }}>PΛCHΛ</span>
+                <img
+                  src={`${typeof __BASE_PATH__ !== 'undefined' ? __BASE_PATH__ : '/'}images/hoja.png`}
+                  alt="Hoja"
+                  style={{
+                    height: 'clamp(3.5rem, 8vw, 6.5rem)',
+                    width: 'auto',
+                    filter: 'drop-shadow(0 2px 8px rgba(0,0,0,0.5))',
+                  }}
+                />
+              </div>
               <span style={{
                 display: 'block',
                 fontFamily: "'Josefin Sans', sans-serif",
@@ -86,16 +97,6 @@ export default function Home() {
                 lineHeight: 1,
               }}>ESPERANZA</span>
             </div>
-            <img
-              src={`${typeof __BASE_PATH__ !== 'undefined' ? __BASE_PATH__ : '/'}images/hoja.png`}
-              alt="Hoja"
-              className="self-center"
-              style={{
-                height: 'clamp(3.5rem, 8vw, 6.5rem)',
-                width: 'auto',
-                filter: 'drop-shadow(0 2px 8px rgba(0,0,0,0.5))',
-              }}
-            />
           </div>
           <p
             className="animate-fade-in-up delay-200 text-left"
