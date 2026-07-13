@@ -146,7 +146,7 @@ export default function Auth() {
               fontWeight: 100,
               fontSize: 'clamp(1.6rem, 4vw, 2.4rem)',
               letterSpacing: '0.25em',
-              color: '#FFD700',
+              color: '#FF1E1E',
               lineHeight: 1,
             }}
           >
@@ -159,7 +159,7 @@ export default function Auth() {
               fontWeight: 100,
               fontSize: 'clamp(0.6rem, 1.4vw, 0.9rem)',
               letterSpacing: '0.55em',
-              color: '#FFD700',
+              color: '#FF1E1E',
             }}
           >
             ESPERANZA
