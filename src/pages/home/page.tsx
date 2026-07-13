@@ -61,17 +61,8 @@ export default function Home() {
       {/* Hero Content */}
       <main className="relative z-10 flex-1 flex flex-col items-center justify-center px-6 text-center">
         <div className="max-w-3xl mx-auto">
-          <div className="animate-fade-in-up flex items-center justify-center gap-4 mb-4 flex-wrap">
-            <img
-              src={`${typeof __BASE_PATH__ !== 'undefined' ? __BASE_PATH__ : '/'}images/hoja.png`}
-              alt="Hoja"
-              style={{
-                height: 'clamp(2.5rem, 6vw, 4.5rem)',
-                width: 'auto',
-                filter: 'drop-shadow(0 2px 8px rgba(0,0,0,0.5))',
-              }}
-            />
-            <div className="flex flex-col items-center">
+          <div className="animate-fade-in-up flex items-center justify-start gap-4 mb-4 flex-wrap">
+            <div className="flex flex-col items-start">
               <span style={{
                 display: 'block',
                 fontFamily: "'Josefin Sans', sans-serif",
@@ -95,9 +86,18 @@ export default function Home() {
                 lineHeight: 1,
               }}>ESPERANZA</span>
             </div>
+            <img
+              src={`${typeof __BASE_PATH__ !== 'undefined' ? __BASE_PATH__ : '/'}images/hoja.png`}
+              alt="Hoja"
+              style={{
+                height: 'clamp(2.5rem, 6vw, 4.5rem)',
+                width: 'auto',
+                filter: 'drop-shadow(0 2px 8px rgba(0,0,0,0.5))',
+              }}
+            />
           </div>
           <p
-            className="animate-fade-in-up delay-200"
+            className="animate-fade-in-up delay-200 text-left"
             style={{
               color: '#FFD700',
               fontFamily: "'Josefin Sans', sans-serif",
@@ -110,10 +110,10 @@ export default function Home() {
           >
             Bienvenido a esta gran familia
           </p>
-          <p className="animate-fade-in-up delay-300 mt-8 max-w-lg mx-auto leading-relaxed text-white" style={{ fontFamily: "'Josefin Sans', sans-serif", fontSize: 'clamp(0.85rem, 1.8vw, 1rem)', fontWeight: 400 }}>
+          <p className="animate-fade-in-up delay-300 mt-8 max-w-lg leading-relaxed text-white text-left" style={{ fontFamily: "'Josefin Sans', sans-serif", fontSize: 'clamp(0.85rem, 1.8vw, 1rem)', fontWeight: 400 }}>
             Ingrese a su página personal para revisar su información de manera segura y privada.
           </p>
-          <div className="animate-fade-in-scale delay-400 mt-12">
+          <div className="animate-fade-in-scale delay-400 mt-12 flex justify-center">
             <button
               onClick={() => navigate("/auth")}
               className="relative inline-flex items-center gap-3 text-white px-12 py-4 cursor-pointer overflow-hidden whitespace-nowrap transition-all duration-300 hover:scale-105"
