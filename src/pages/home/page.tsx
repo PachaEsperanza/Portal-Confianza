@@ -79,7 +79,7 @@ export default function Home() {
                 fontWeight: 100,
                 letterSpacing: '0.3em',
                 lineHeight: 1,
-                color: '#6B0F1A',
+                color: '#B4122F',
               }}>PΛCHΛ</span>
               <span style={{
                 display: 'block',
@@ -87,7 +87,7 @@ export default function Home() {
                 fontSize: 'clamp(0.75rem,1.9vw,1.55rem)',
                 fontWeight: 100,
                 letterSpacing: '0.55em',
-                color: '#6B0F1A',
+                color: '#B4122F',
                 textTransform: 'uppercase',
                 marginTop: '0.15em',
                 lineHeight: 1,
@@ -101,7 +101,7 @@ export default function Home() {
               fontFamily: "'Josefin Sans', sans-serif",
               fontWeight: 300,
               fontStyle: 'italic',
-              fontSize: 'clamp(1.1rem, 2.6vw, 1.7rem)',
+              fontSize: 'clamp(0.9rem, 2.1vw, 1.4rem)',
               letterSpacing: '0.04em',
               textShadow: '0 1px 6px rgba(0,0,0,0.5)',
             }}
