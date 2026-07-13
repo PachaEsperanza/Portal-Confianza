@@ -76,13 +76,13 @@ interface FormData {
   firmaProductor: string; huellaProductor: string; firmaAcopiador: string; fechaLugar: string; declaracionJurada: boolean; dniAcopiador: string; provincia: string; tieneTitulo: string; fotoAcopiadorProductor: string;
   numeroHijos: string; tieneConyuge: string; fechasCumpleanosFamilia: string;
   tieneEnfermedadDiscapacidad: string; detalleEnfermedadDiscapacidad: string;
-  emergenciasFamiliares: string; usoDineroActual: string; destinoFondoFamiliar: string;
+  emergenciasFamiliares: string; destinoFondoFamiliar: string;
 }
 
 const MESES = ["Ene","Feb","Mar","Abr","May","Jun","Jul","Ago","Sep","Oct","Nov","Dic"];
 
 const SECTIONS: { id: SectionId; num: string; title: string; icon: string; required: (keyof FormData)[] }[] = [
-  { id: "identidad",    num: "01", title: "Identidad del Productor",      icon: "ri-user-line",           required: ["nombre","dni","telefono","comunidad","distrito","fotoProductor","numeroHijos","tieneConyuge","fechasCumpleanosFamilia","tieneEnfermedadDiscapacidad","emergenciasFamiliares","usoDineroActual","destinoFondoFamiliar"] },
+  { id: "identidad",    num: "01", title: "Identidad del Productor",      icon: "ri-user-line",           required: ["nombre","dni","telefono","comunidad","distrito","fotoProductor","numeroHijos","tieneConyuge","fechasCumpleanosFamilia","tieneEnfermedadDiscapacidad","emergenciasFamiliares","destinoFondoFamiliar"] },
   { id: "parcela",      num: "02", title: "Parcela y Georreferenciación", icon: "ri-map-pin-line",         required: ["nombreParcela","superficieTotal","areaCacao","fuenteHidrica","parcelaCoords"] },
   { id: "cultivo",      num: "03", title: "Características del Cultivo",  icon: "ri-plant-line",           required: ["edadPlantas","distanciamiento","gradosBrix"] },
   { id: "produccion",   num: "04", title: "Producción y Cosecha",         icon: "ri-shopping-basket-line", required: ["estimadoAnual","tipoAcopio"] },
@@ -137,7 +137,7 @@ const init: FormData = {
   firmaProductor:"", huellaProductor:"", firmaAcopiador:"", fechaLugar:"", declaracionJurada:false, dniAcopiador:"", provincia:"", tieneTitulo:"", fotoAcopiadorProductor:"",
   numeroHijos:"", tieneConyuge:"", fechasCumpleanosFamilia:"",
   tieneEnfermedadDiscapacidad:"", detalleEnfermedadDiscapacidad:"",
-  emergenciasFamiliares:"", usoDineroActual:"", destinoFondoFamiliar:"",
+  emergenciasFamiliares:"", destinoFondoFamiliar:"",
 };
 
 // ─── CREMA STYLE HELPERS ─────────────────────────────────────────────────────
@@ -938,11 +938,6 @@ export default function Registro() {
                 <label className={lbl}>Emergencias familiares o dificultades que enfrenta actualmente{reqStar}</label>
                 <textarea rows={2} className={I("emergenciasFamiliares")} placeholder="Ej: deudas, salud, vivienda, algún problema urgente..." value={data.emergenciasFamiliares} onChange={e => upd("emergenciasFamiliares", e.target.value)} />
                 {isErr("emergenciasFamiliares") && <p className="text-xs text-red-600 mt-1 font-bold">⚠️ Este campo es obligatorio</p>}
-              </div>
-              <div>
-                <label className={lbl}>¿En qué se usa el dinero que ya gana con su cultivo?{reqStar}</label>
-                <input className={I("usoDineroActual")} placeholder="Ej: alimentación, estudios, vivienda..." value={data.usoDineroActual} onChange={e => upd("usoDineroActual", e.target.value)} />
-                {isErr("usoDineroActual") && <p className="text-xs text-red-600 mt-1 font-bold">⚠️ Este campo es obligatorio</p>}
               </div>
               <div>
                 <label className={lbl}>¿A dónde va el fondo familiar? (cuidados, medicinas, cultivo){reqStar}</label>
