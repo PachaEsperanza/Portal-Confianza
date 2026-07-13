@@ -75,19 +75,19 @@ export default function Home() {
               <span style={{
                 display: 'block',
                 fontFamily: "'Josefin Sans', sans-serif",
-                fontSize: 'clamp(3rem,8vw,6.5rem)',
+                fontSize: 'clamp(2.6rem,7vw,5.7rem)',
                 fontWeight: 100,
                 letterSpacing: '0.3em',
                 lineHeight: 1,
-                color: '#FFD700',
+                color: '#6B0F1A',
               }}>PΛCHΛ</span>
               <span style={{
                 display: 'block',
                 fontFamily: "'Josefin Sans', sans-serif",
-                fontSize: 'clamp(0.9rem,2.2vw,1.8rem)',
+                fontSize: 'clamp(0.75rem,1.9vw,1.55rem)',
                 fontWeight: 100,
                 letterSpacing: '0.55em',
-                color: '#FFD700',
+                color: '#6B0F1A',
                 textTransform: 'uppercase',
                 marginTop: '0.15em',
                 lineHeight: 1,
@@ -97,18 +97,18 @@ export default function Home() {
           <p
             className="animate-fade-in-up delay-200"
             style={{
-              color: '#CC0000',
-              fontFamily: "'Playfair Display', serif",
-              fontWeight: 950,
+              color: '#FFD700',
+              fontFamily: "'Josefin Sans', sans-serif",
+              fontWeight: 300,
               fontStyle: 'italic',
-              fontSize: 'clamp(1.2rem, 2.8vw, 1.9rem)',
+              fontSize: 'clamp(1.1rem, 2.6vw, 1.7rem)',
               letterSpacing: '0.04em',
               textShadow: '0 1px 6px rgba(0,0,0,0.5)',
             }}
           >
             Bienvenido a esta gran familia
           </p>
-          <p className="animate-fade-in-up delay-300 mt-8 max-w-lg mx-auto leading-relaxed text-white" style={{ fontFamily: 'Arial, sans-serif', fontSize: 'clamp(0.95rem, 2vw, 1.1rem)', fontWeight: 400 }}>
+          <p className="animate-fade-in-up delay-300 mt-8 max-w-lg mx-auto leading-relaxed text-white" style={{ fontFamily: "'Josefin Sans', sans-serif", fontSize: 'clamp(0.85rem, 1.8vw, 1rem)', fontWeight: 400 }}>
             Ingrese a su página personal para revisar su información de manera segura y privada.
           </p>
           <div className="animate-fade-in-scale delay-400 mt-12">
@@ -123,16 +123,6 @@ export default function Home() {
                 animation: "pulse-glow 3s ease-in-out infinite",
               }}
             >
-              <span className="absolute inset-0 pointer-events-none overflow-hidden" style={{ borderRadius: '9999px' }}>
-                <span
-                  className="absolute top-0 left-0 w-full h-full"
-                  style={{
-                    background: "linear-gradient(120deg, transparent 30%, rgba(255,255,255,0.25) 50%, transparent 70%)",
-                    animation: "shine 2.5s ease-in-out infinite",
-                    transform: "skewX(-20deg)",
-                  }}
-                />
-              </span>
               <span className="relative z-10 font-serif font-bold tracking-[0.2em] uppercase text-sm" style={{ color: '#f5d0a9' }}>Acceder al Portal</span>
               <i className="ri-arrow-right-line text-base relative z-10" style={{ color: '#f5d0a9' }} />
             </button>
