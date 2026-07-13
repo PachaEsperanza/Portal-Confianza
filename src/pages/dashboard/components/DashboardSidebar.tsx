@@ -33,7 +33,7 @@ export default function DashboardSidebar() {
               style={{
                 fontFamily: "'Josefin Sans', sans-serif",
                 fontWeight: 100,
-                color: '#FFD700',
+                color: '#FF1E1E',
                 fontSize: '0.85rem',
                 letterSpacing: '0.15em',
               }}
@@ -80,7 +80,7 @@ export default function DashboardSidebar() {
                 style={{
                   fontFamily: "'Josefin Sans', sans-serif",
                   fontWeight: 100,
-                  color: '#FFD700',
+                  color: '#FF1E1E',
                   fontSize: '0.95rem',
                   letterSpacing: '0.15em',
                 }}
@@ -162,7 +162,7 @@ export default function DashboardSidebar() {
               style={{
                 fontFamily: "'Josefin Sans', sans-serif",
                 fontWeight: 100,
-                color: '#FFD700',
+                color: '#FF1E1E',
                 fontSize: '0.85rem',
                 letterSpacing: '0.15em',
               }}
