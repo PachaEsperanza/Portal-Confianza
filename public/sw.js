@@ -22,14 +22,26 @@ self.addEventListener('activate', (e) => {
 });
 
 self.addEventListener('fetch', (e) => {
-  // Network first, fallback to cache
+  const req = e.request;
+
+  // Solo interceptar peticiones GET (POST, PUT, etc. pasan directo)
+  if (req.method !== 'GET') {
+    return;
+  }
+
+  // Solo cachear del mismo origen (evita chrome-extension, supabase.co, etc.)
+  const url = new URL(req.url);
+  if (url.origin !== self.location.origin) {
+    return;
+  }
+
   e.respondWith(
-    fetch(e.request)
+    fetch(req)
       .then(res => {
         const clone = res.clone();
-        caches.open(CACHE_NAME).then(cache => cache.put(e.request, clone));
+        caches.open(CACHE_NAME).then(cache => cache.put(req, clone));
         return res;
       })
-      .catch(() => caches.match(e.request))
+      .catch(() => caches.match(req))
   );
 });
