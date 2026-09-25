@@ -141,6 +141,27 @@ export default function ParcelaMapPicker({ value, onChange }: ParcelaMapPickerPr
       updateCircle(value.lat, value.lng, value.perimetroRadio);
     }
 
+    // Si todavía no hay una ubicación marcada, pedimos el GPS del dispositivo
+    // automáticamente al abrir el mapa (en vez de esperar a que el usuario
+    // toque "Usar mi ubicación GPS actual").
+    if (!value && navigator.geolocation) {
+      setLocating(true);
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          const lat = pos.coords.latitude;
+          const lng = pos.coords.longitude;
+          setLocating(false);
+          map.setCenter({ lat, lng });
+          map.setZoom(17);
+          marker.setPosition({ lat, lng });
+          marker.setVisible(true);
+          onChange({ lat, lng, altitud: undefined, perimetroRadio: radioSeleccionado ?? undefined });
+        },
+        () => setLocating(false), // permiso denegado o sin señal GPS: se queda el mapa por defecto
+        { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
+      );
+    }
+
     map.addListener('click', (e: any) => {
       const lat = e.latLng.lat();
       const lng = e.latLng.lng();

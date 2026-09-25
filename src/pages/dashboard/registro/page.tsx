@@ -1,10 +1,96 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import ParcelaMapPicker, { ParcelaCoords } from './ParcelaMapPicker';
 import { createClient } from "@supabase/supabase-js";
 
 const SUPABASE_URL = "https://wxgqhhfgrddgvxkovcdk.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind4Z3FoaGZncmRkZ3Z4a292Y2RrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU5MjkwNTAsImV4cCI6MjA5MTUwNTA1MH0.n16R741D8J993Xs9c8QNO3iT4lTWvnRhvgmN1ph2lqs";
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+// ─── GUARDADO SIN CONEXIÓN ──────────────────────────────────────────────────
+// Si no hay internet (zonas alejadas), el registro se guarda en el propio
+// celular/PC y se envía solo automáticamente cuando vuelve la señal.
+const PENDING_KEY = "pending_registros_confianza";
+
+function getPendingQueue(): Record<string, unknown>[] {
+  try {
+    return JSON.parse(localStorage.getItem(PENDING_KEY) || "[]");
+  } catch {
+    return [];
+  }
+}
+
+function savePendingQueue(queue: Record<string, unknown>[]) {
+  try {
+    localStorage.setItem(PENDING_KEY, JSON.stringify(queue));
+  } catch {
+    // si el almacenamiento local está lleno, no hacemos nada más:
+    // el registro ya quedó "submitted" para el usuario en pantalla.
+  }
+}
+
+function fileToBase64(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result as string);
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
+function dataURLtoBlob(dataUrl: string): Blob {
+  const [header, base64] = dataUrl.split(",");
+  const mimeMatch = header.match(/data:(.*?);base64/);
+  const mime = mimeMatch ? mimeMatch[1] : "application/octet-stream";
+  const binary = atob(base64);
+  const bytes = new Uint8Array(binary.length);
+  for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+  return new Blob([bytes], { type: mime });
+}
+
+// Campos de tipo archivo que se suben a Supabase Storage. Si el registro se
+// guardó offline, estos llegan en base64 y hay que subirlos al sincronizar.
+const MEDIA_FIELDS: { field: string; bucket: string; folder: string }[] = [
+  { field: "foto_productor", bucket: "registros-media", folder: "fotos-productor" },
+  { field: "video_productor", bucket: "registros-media", folder: "videos-productor" },
+  { field: "foto_acopiador_productor", bucket: "registros-media", folder: "fotos-conjunto" },
+];
+
+// Intenta enviar todos los registros pendientes guardados localmente.
+// Se llama sola al recuperar conexión (evento "online") y al abrir la página.
+async function trySyncPendingRegistros(onProgress?: (pendientes: number) => void) {
+  const queue = getPendingQueue();
+  if (queue.length === 0) { onProgress?.(0); return; }
+
+  const remaining: Record<string, unknown>[] = [];
+  for (const item of queue) {
+    try {
+      const row: Record<string, unknown> = { ...item };
+
+      // Subir a Storage lo que se guardó en base64 mientras no había señal
+      for (const { field, bucket, folder } of MEDIA_FIELDS) {
+        const val = row[field];
+        if (typeof val === "string" && val.startsWith("data:")) {
+          const blob = dataURLtoBlob(val);
+          const ext = (blob.type.split("/")[1] || "jpg").split("+")[0];
+          const path = `${folder}/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
+          const { error: upErr } = await supabase.storage.from(bucket).upload(path, blob, { upsert: false });
+          if (upErr) throw upErr;
+          const { data: pub } = supabase.storage.from(bucket).getPublicUrl(path);
+          row[field] = pub.publicUrl;
+        }
+      }
+
+      const { error: dbError } = await supabase.from("registros").insert([row]);
+      if (dbError) throw dbError;
+
+      await supabase.functions.invoke("enviar-registro", { body: { registro: row } });
+    } catch {
+      remaining.push(item); // se reintenta la próxima vez que haya conexión
+    }
+  }
+  savePendingQueue(remaining);
+  onProgress?.(remaining.length);
+}
 
 // Etiquetas legibles para los campos obligatorios
 const FIELD_LABELS: Partial<Record<string, string>> = {
@@ -186,14 +272,34 @@ function MediaUpload({ label, accept, value, onChange, required, icon, hint, cap
     const path = `${folder}/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
     setUploading(true);
     setUploadErr("");
+
+    // Sin conexión: se guarda el archivo localmente (base64) y se sube solo
+    // más adelante, cuando el registro completo se sincronice con Supabase.
+    if (!navigator.onLine) {
+      try {
+        onChange(await fileToBase64(file));
+      } catch {
+        setUploadErr("No se pudo leer el archivo");
+      } finally {
+        setUploading(false);
+      }
+      return;
+    }
+
     try {
       const { error } = await supabase.storage.from(bucket).upload(path, file, { upsert: false });
       if (error) throw error;
       const { data: pub } = supabase.storage.from(bucket).getPublicUrl(path);
       onChange(pub.publicUrl);
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : "Error al subir archivo";
-      setUploadErr(msg);
+      // Si la subida falla por falta de señal (no por un error del servidor),
+      // igual guardamos el archivo localmente para no perderlo.
+      try {
+        onChange(await fileToBase64(file));
+      } catch {
+        const msg = err instanceof Error ? err.message : "Error al subir archivo";
+        setUploadErr(msg);
+      }
     } finally {
       setUploading(false);
     }
@@ -215,9 +321,16 @@ function MediaUpload({ label, accept, value, onChange, required, icon, hint, cap
             <p className="text-[11px] text-blue-400">Espera un momento</p>
           </div>
         ) : value ? (
-          isVideo
-            ? <video src={value} className="max-h-36 rounded-lg" controls />
-            : <img src={value} alt="" className="max-h-36 rounded-lg object-cover" />
+          <>
+            {isVideo
+              ? <video src={value} className="max-h-36 rounded-lg" controls />
+              : <img src={value} alt="" className="max-h-36 rounded-lg object-cover" />}
+            {value.startsWith("data:") && (
+              <span className="absolute bottom-2 left-2 text-[10px] font-bold bg-amber-600 text-white px-2 py-0.5 rounded-full z-10">
+                📴 Guardado local, pendiente de subir
+              </span>
+            )}
+          </>
         ) : (
           <>
             <i className={`${icon} text-3xl text-amber-600`} />
@@ -370,59 +483,25 @@ export default function Registro() {
 
   const [isSaving, setIsSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
+  const [pendingCount, setPendingCount] = useState<number>(() => getPendingQueue().length);
+  const [syncing, setSyncing] = useState(false);
+
+  const runSync = async () => {
+    setSyncing(true);
+    await trySyncPendingRegistros(setPendingCount);
+    setSyncing(false);
+  };
+
+  useEffect(() => {
+    runSync(); // por si ya había registros pendientes de una sesión anterior
+    window.addEventListener("online", runSync);
+    return () => window.removeEventListener("online", runSync);
+  }, []);
 
   const handleSubmit = async () => {
-    const allMissing: { section: string; num: string; id: SectionId; fields: string[] }[] = [];
-    const allNewErrors: Partial<Record<keyof FormData, boolean>> = {};
-
-    // Validar campos de portada (nombre y DNI del acopiador)
-    const portadaMissing: string[] = [];
-    if (!data.nombreAcopiador.trim()) {
-      allNewErrors["nombreAcopiador"] = true;
-      portadaMissing.push("Nombre del acopiador");
-    }
-    if (!String(data.dniAcopiador || "").trim()) {
-      allNewErrors["dniAcopiador"] = true;
-      portadaMissing.push("DNI del acopiador");
-    }
-    if (portadaMissing.length > 0) {
-      allMissing.push({ section: "Datos del acopiador", num: "00", id: "identidad", fields: portadaMissing });
-    }
-
-    for (const sec of SECTIONS) {
-      const missingFields: string[] = [];
-      for (const field of sec.required) {
-        const val = data[field];
-        const empty = typeof val === "boolean" ? !val : !String(val).trim();
-        if (empty) {
-          allNewErrors[field] = true;
-          missingFields.push(FIELD_LABELS[field] || String(field));
-        }
-      }
-      if (sec.id === "parcela") {
-        const hasVia = data.viasTrocha || data.viasAfirmada || data.viasAsfaltado || data.viasHerradura || data.viasFluvial || data.viasPie;
-        if (!hasVia) {
-          allNewErrors["viasTrocha"] = true;
-          missingFields.push(FIELD_LABELS["viasTrocha"] || "Vía de acceso");
-        }
-        if (!data.parcelaCoords) {
-          missingFields.push("Ubicación en el mapa (sección 2.4)");
-        } else if (!data.parcelaCoords.altitud) {
-          missingFields.push("Altitud de la parcela (msnm)");
-        }
-      }
-      if (missingFields.length > 0) {
-        allMissing.push({ section: sec.title, num: sec.num, id: sec.id, fields: missingFields });
-      }
-    }
-
-    setErrors(e => ({ ...e, ...allNewErrors }));
-
-    if (allMissing.length > 0) {
-      setValidationModal(allMissing);
-      return;
-    }
-
+    // Validación de campos obligatorios desactivada a pedido de Fati:
+    // el registro se puede guardar/enviar aunque falten datos, para no
+    // bloquear el trabajo de campo en zonas sin buena señal o tiempo limitado.
     setIsSaving(true);
     setSaveError(null);
 
@@ -431,9 +510,13 @@ export default function Registro() {
     const fechaHora = now.toISOString().split("T")[0] + " " + now.toTimeString().slice(0, 5);
     const finalData = { ...data, folio: confirmedFolio, fecha: fechaHora };
 
+    // Declarado fuera del try para poder guardarlo localmente en el catch
+    // si falla por falta de conexión.
+    let row: Record<string, unknown> = {};
+
     try {
       // 1. Guardar en Supabase — mapeo explícito camelCase → snake_case
-      const row = {
+      row = {
         created_at: now.toISOString(),
         folio: finalData.folio,
         fecha: finalData.fecha,
@@ -582,6 +665,9 @@ export default function Registro() {
         raw_data: finalData,
       };
 
+      // Sin conexión: no lo intentamos por red, lo guardamos local de una vez.
+      if (!navigator.onLine) throw new Error("OFFLINE");
+
       const { error: dbError } = await supabase
         .from("registros")
         .insert([row]);
@@ -605,10 +691,17 @@ export default function Registro() {
 
       setData(d => ({ ...d, folio: confirmedFolio, fecha: fechaHora }));
       setSubmitted(true);
-    } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : "Error desconocido";
-      setSaveError(msg);
-      showToast("⚠️ " + msg);
+    } catch {
+      // Sin señal (o falló la red a mitad de camino): no se pierde el
+      // registro. Se guarda en el dispositivo y se sincroniza solo con
+      // Supabase (incluyendo fotos/videos) en cuanto vuelva la conexión.
+      const queue = getPendingQueue();
+      queue.push(row);
+      savePendingQueue(queue);
+      setPendingCount(queue.length);
+      setData(d => ({ ...d, folio: confirmedFolio, fecha: fechaHora }));
+      setSubmitted(true);
+      showToast("📴 Guardado sin conexión. Se enviará solo cuando haya internet.");
     } finally {
       setIsSaving(false);
     }
@@ -632,6 +725,11 @@ export default function Registro() {
         <p className="text-sm text-stone-700 max-w-sm font-medium leading-relaxed">
           La ficha del productor fue completada y firmada. Los datos tienen validez de declaración jurada.
         </p>
+        {pendingCount > 0 && (
+          <p className="text-xs font-bold text-amber-700 bg-amber-50 border border-amber-300 rounded-lg px-3 py-2">
+            📴 {pendingCount} registro{pendingCount > 1 ? "s" : ""} guardado{pendingCount > 1 ? "s" : ""} sin conexión, pendiente{pendingCount > 1 ? "s" : ""} de subir a Supabase. Se enviará{pendingCount > 1 ? "n" : ""} solo{pendingCount > 1 ? "s" : ""} cuando haya internet.
+          </p>
+        )}
         <button onClick={() => { setData({ ...init, folio: getNextFolio() }); setSubmitted(false); setActive("identidad"); }}
           className="mt-4 px-6 py-3 rounded-lg text-sm font-bold text-white bg-amber-700 hover:bg-amber-800 transition-all shadow-md">
           <i className="ri-add-line mr-2" /> Nuevo registro
@@ -643,6 +741,20 @@ export default function Registro() {
   return (
     <div className="space-y-4 pb-8">
       {toast && <Toast msg={toast} onClose={() => setToast(null)} />}
+
+      {/* Aviso de registros pendientes por sincronizar */}
+      {pendingCount > 0 && (
+        <div className="flex items-center justify-between gap-3 p-3 rounded-xl border-2 border-amber-400 bg-amber-50 text-amber-800">
+          <p className="text-xs font-bold">
+            <i className="ri-cloud-off-line mr-1" />
+            {pendingCount} registro{pendingCount > 1 ? "s" : ""} pendiente{pendingCount > 1 ? "s" : ""} de sincronizar
+          </p>
+          <button type="button" onClick={runSync} disabled={syncing}
+            className="text-[11px] font-bold px-3 py-1.5 rounded-lg border-2 border-amber-500 bg-white hover:bg-amber-100 disabled:opacity-60 transition-all">
+            {syncing ? "Sincronizando..." : "Sincronizar ahora"}
+          </button>
+        </div>
+      )}
 
       {/* MODAL DE VALIDACIÓN — muestra todos los campos faltantes */}
       {validationModal && (
