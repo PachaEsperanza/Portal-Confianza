@@ -84,7 +84,41 @@ export default function ParcelaMapPicker({ value, onChange }: ParcelaMapPickerPr
   const [layersPanelOpen, setLayersPanelOpen] = useState(false);
   const [streetViewActive, setStreetViewActive] = useState(false);
   const [locating, setLocating] = useState(false);
+  const [gpsError, setGpsError] = useState<string | null>(null);
   const [radioSeleccionado, setRadioSeleccionado] = useState<number | null>(value?.perimetroRadio ?? null);
+
+  // Traduce el error de geolocalización del navegador a un mensaje entendible
+  const describeGpsError = (err: GeolocationPositionError): string => {
+    if (err.code === err.PERMISSION_DENIED) {
+      return '🚫 Sin permiso de ubicación. Ve a Ajustes del celular → permisos del navegador → Ubicación, y actívalo para este sitio.';
+    }
+    if (err.code === err.TIMEOUT) {
+      return '⏱️ Se agotó el tiempo esperando el GPS. Sal a un lugar abierto (sin techo) e inténtalo de nuevo.';
+    }
+    return '📡 No se pudo obtener tu ubicación (GPS/señal débil). Verifica que la Ubicación del celular esté activada e inténtalo de nuevo.';
+  };
+
+  // Intenta obtener la posición con alta precisión; si falla, reintenta una
+  // vez con baja precisión (más lento pero funciona con señal débil o en
+  // interiores, usando la ubicación aproximada por red/wifi).
+  const requestPosition = useCallback((
+    onSuccess: (pos: GeolocationPosition) => void,
+    onFinalError: (err: GeolocationPositionError) => void,
+  ) => {
+    navigator.geolocation.getCurrentPosition(
+      onSuccess,
+      (err) => {
+        if (err.code === err.PERMISSION_DENIED) { onFinalError(err); return; }
+        // Reintento con baja precisión
+        navigator.geolocation.getCurrentPosition(
+          onSuccess,
+          onFinalError,
+          { enableHighAccuracy: false, timeout: 20000, maximumAge: 60000 }
+        );
+      },
+      { enableHighAccuracy: true, timeout: 12000, maximumAge: 0 }
+    );
+  }, []);
 
   useEffect(() => {
     if (!scriptLoaded && !scriptError) {
@@ -146,7 +180,8 @@ export default function ParcelaMapPicker({ value, onChange }: ParcelaMapPickerPr
     // toque "Usar mi ubicación GPS actual").
     if (!value && navigator.geolocation) {
       setLocating(true);
-      navigator.geolocation.getCurrentPosition(
+      setGpsError(null);
+      requestPosition(
         (pos) => {
           const lat = pos.coords.latitude;
           const lng = pos.coords.longitude;
@@ -157,8 +192,7 @@ export default function ParcelaMapPicker({ value, onChange }: ParcelaMapPickerPr
           marker.setVisible(true);
           onChange({ lat, lng, altitud: undefined, perimetroRadio: radioSeleccionado ?? undefined });
         },
-        () => setLocating(false), // permiso denegado o sin señal GPS: se queda el mapa por defecto
-        { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
+        (err) => { setLocating(false); setGpsError(describeGpsError(err)); }
       );
     }
 
@@ -202,9 +236,13 @@ export default function ParcelaMapPicker({ value, onChange }: ParcelaMapPickerPr
   }, [value, onChange, updateCircle]);
 
   const handleGPS = useCallback(() => {
-    if (!navigator.geolocation) return;
+    if (!navigator.geolocation) {
+      setGpsError('📡 Tu navegador no soporta GPS. Prueba con Chrome o Safari actualizado.');
+      return;
+    }
     setLocating(true);
-    navigator.geolocation.getCurrentPosition(
+    setGpsError(null);
+    requestPosition(
       (pos) => {
         const lat = pos.coords.latitude;
         const lng = pos.coords.longitude;
@@ -215,10 +253,9 @@ export default function ParcelaMapPicker({ value, onChange }: ParcelaMapPickerPr
         onChange(newCoords);
         updateCircle(lat, lng, radioSeleccionado);
       },
-      () => setLocating(false),
-      { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
+      (err) => { setLocating(false); setGpsError(describeGpsError(err)); }
     );
-  }, [onChange, value, radioSeleccionado, updateCircle]);
+  }, [onChange, value, radioSeleccionado, updateCircle, requestPosition]);
 
   const MAP_TYPES: { id: MapTypeId; label: string; icon: string }[] = [
     { id: 'roadmap', label: 'Mapa', icon: 'ri-road-map-line' },
@@ -270,6 +307,11 @@ export default function ParcelaMapPicker({ value, onChange }: ParcelaMapPickerPr
           ? <><span className="animate-spin w-4 h-4 border-2 border-emerald-400 border-t-emerald-700 rounded-full" />Obteniendo ubicación GPS...</>
           : <><i className="ri-focus-3-line" />Usar mi ubicación GPS actual</>}
       </button>
+      {gpsError && (
+        <p className="text-xs text-center font-bold text-red-700 bg-red-50 border-2 border-red-300 rounded-lg px-3 py-2">
+          {gpsError}
+        </p>
+      )}
       <p className="text-xs text-center font-bold text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2">
         📱 En celular: toca <span className="underline">2 veces</span> para mayor precisión. En computadora: haz click en el mapa directamente.
       </p>
