@@ -15,7 +15,9 @@ export interface ParcelaCoords {
   lat: number;
   lng: number;
   altitud?: string;
-  perimetroRadio?: number; // metros, opcional
+  perimetroRadio?: number; // metros, opcional (legado — ya no se usa desde la UI)
+  poligono?: { lat: number; lng: number }[]; // esquinas del perímetro real de la parcela
+  areaPoligonoHa?: number; // área calculada del polígono, en hectáreas
 }
 
 interface ParcelaMapPickerProps {
@@ -49,7 +51,7 @@ function loadGoogleMapsScript(onSuccess: () => void, onError: () => void) {
   };
 
   const script = document.createElement('script');
-  script.src = `https://maps.googleapis.com/maps/api/js?key=${GMAPS_KEY}&callback=initGoogleMap&libraries=streetview`;
+  script.src = `https://maps.googleapis.com/maps/api/js?key=${GMAPS_KEY}&callback=initGoogleMap&libraries=streetview,geometry`;
   script.async = true; script.defer = true;
   script.onerror = () => {
     scriptError = true; scriptLoading = false;
@@ -77,6 +79,9 @@ export default function ParcelaMapPicker({ value, onChange }: ParcelaMapPickerPr
   const markerRef = useRef<any>(null);
   const circleRef = useRef<any>(null);
   const svPanoramaRef = useRef<any>(null);
+  const polygonRef = useRef<any>(null);
+  const poligonoPtsRef = useRef<{ lat: number; lng: number }[]>(value?.poligono ?? []);
+  const drawingRef = useRef(false);
 
   const [ready, setReady] = useState(scriptLoaded);
   const [mapError, setMapError] = useState(scriptError);
@@ -86,6 +91,10 @@ export default function ParcelaMapPicker({ value, onChange }: ParcelaMapPickerPr
   const [locating, setLocating] = useState(false);
   const [gpsError, setGpsError] = useState<string | null>(null);
   const [radioSeleccionado, setRadioSeleccionado] = useState<number | null>(value?.perimetroRadio ?? null);
+  const [drawingPoligono, setDrawingPoligono] = useState(false);
+  const [poligonoPtsUI, setPoligonoPtsUI] = useState<{ lat: number; lng: number }[]>(value?.poligono ?? []);
+
+  useEffect(() => { drawingRef.current = drawingPoligono; }, [drawingPoligono]);
 
   // Traduce el error de geolocalización del navegador a un mensaje entendible
   const describeGpsError = (err: GeolocationPositionError): string => {
@@ -143,6 +152,30 @@ export default function ParcelaMapPicker({ value, onChange }: ParcelaMapPickerPr
     }
   }, []);
 
+  // Calcula el área del polígono (m² → hectáreas) usando la librería geometry
+  const computeAreaHa = (pts: { lat: number; lng: number }[]): number | undefined => {
+    if (pts.length < 3 || !window.google?.maps?.geometry) return undefined;
+    const path = pts.map(p => new window.google.maps.LatLng(p.lat, p.lng));
+    const areaM2 = window.google.maps.geometry.spherical.computeArea(path);
+    return areaM2 / 10000;
+  };
+
+  const drawPolygon = useCallback((pts: { lat: number; lng: number }[]) => {
+    if (!mapInstanceRef.current) return;
+    if (polygonRef.current) { polygonRef.current.setMap(null); polygonRef.current = null; }
+    if (pts.length > 0) {
+      polygonRef.current = new window.google.maps.Polygon({
+        paths: pts,
+        strokeColor: '#16a34a',
+        strokeOpacity: 0.9,
+        strokeWeight: 2,
+        fillColor: '#22c55e',
+        fillOpacity: 0.2,
+        map: mapInstanceRef.current,
+      });
+    }
+  }, []);
+
   useEffect(() => {
     if (!ready || !mapRef.current) return;
 
@@ -174,6 +207,9 @@ export default function ParcelaMapPicker({ value, onChange }: ParcelaMapPickerPr
     if (value && value.perimetroRadio) {
       updateCircle(value.lat, value.lng, value.perimetroRadio);
     }
+    if (value && value.poligono && value.poligono.length > 0) {
+      drawPolygon(value.poligono);
+    }
 
     // Si todavía no hay una ubicación marcada, pedimos el GPS del dispositivo
     // automáticamente al abrir el mapa (en vez de esperar a que el usuario
@@ -199,9 +235,20 @@ export default function ParcelaMapPicker({ value, onChange }: ParcelaMapPickerPr
     map.addListener('click', (e: any) => {
       const lat = e.latLng.lat();
       const lng = e.latLng.lng();
+
+      // Modo "dibujar perímetro": cada toque agrega una esquina del polígono
+      if (drawingRef.current) {
+        const pts = [...poligonoPtsRef.current, { lat, lng }];
+        poligonoPtsRef.current = pts;
+        setPoligonoPtsUI(pts);
+        drawPolygon(pts);
+        onChange({ ...(value ?? { lat, lng }), poligono: pts, areaPoligonoHa: computeAreaHa(pts) });
+        return;
+      }
+
       marker.setPosition({ lat, lng });
       marker.setVisible(true);
-      const newCoords = { lat, lng, altitud: value?.altitud, perimetroRadio: radioSeleccionado ?? undefined };
+      const newCoords = { lat, lng, altitud: value?.altitud, perimetroRadio: radioSeleccionado ?? undefined, poligono: poligonoPtsRef.current, areaPoligonoHa: computeAreaHa(poligonoPtsRef.current) };
       onChange(newCoords);
       updateCircle(lat, lng, radioSeleccionado);
     });
@@ -256,6 +303,26 @@ export default function ParcelaMapPicker({ value, onChange }: ParcelaMapPickerPr
       (err) => { setLocating(false); setGpsError(describeGpsError(err)); }
     );
   }, [onChange, value, radioSeleccionado, updateCircle, requestPosition]);
+
+  const toggleDrawMode = useCallback(() => {
+    setDrawingPoligono(v => !v);
+  }, []);
+
+  const undoLastPoint = useCallback(() => {
+    const pts = poligonoPtsRef.current.slice(0, -1);
+    poligonoPtsRef.current = pts;
+    setPoligonoPtsUI(pts);
+    drawPolygon(pts);
+    onChange({ ...(value ?? { lat: DEFAULT_LAT, lng: DEFAULT_LNG }), poligono: pts, areaPoligonoHa: computeAreaHa(pts) });
+  }, [value, onChange, drawPolygon]);
+
+  const clearPolygon = useCallback(() => {
+    poligonoPtsRef.current = [];
+    setPoligonoPtsUI([]);
+    drawPolygon([]);
+    setDrawingPoligono(false);
+    if (value) onChange({ ...value, poligono: [], areaPoligonoHa: undefined });
+  }, [value, onChange, drawPolygon]);
 
   const MAP_TYPES: { id: MapTypeId; label: string; icon: string }[] = [
     { id: 'roadmap', label: 'Mapa', icon: 'ri-road-map-line' },
@@ -385,49 +452,50 @@ export default function ParcelaMapPicker({ value, onChange }: ParcelaMapPickerPr
         </div>
       )}
 
-      {/* Perimetro — opcional */}
+      {/* Perímetro real de la parcela — dibujado como polígono */}
       <div className="p-3 rounded-xl border border-stone-200 bg-stone-50 space-y-2">
         <div className="flex items-center justify-between">
           <p className="text-xs font-bold text-stone-600 uppercase tracking-wide">
-            <i className="ri-circle-line mr-1 text-amber-600" />
-            Perímetro aproximado <span className="text-stone-400 normal-case font-normal">(opcional)</span>
+            <i className="ri-shape-line mr-1 text-emerald-600" />
+            Perímetro de la parcela <span className="text-stone-400 normal-case font-normal">(opcional)</span>
           </p>
-          {radioSeleccionado && (
-            <button type="button" onClick={() => handleRadioChange(null)}
+          {poligonoPtsUI.length > 0 && (
+            <button type="button" onClick={clearPolygon}
               className="text-[11px] text-red-500 hover:text-red-700 font-medium">
-              Quitar
+              Quitar todo
             </button>
           )}
         </div>
-        <div className="flex flex-wrap gap-2 mb-2">
-          {RADIOS_RAPIDOS.map(r => (
-            <button key={r.value} type="button" onClick={() => handleRadioChange(radioSeleccionado === r.value ? null : r.value)}
-              className={`px-3 py-1.5 rounded-lg text-xs font-bold border-2 transition-all ${radioSeleccionado === r.value ? 'border-amber-500 bg-amber-50 text-amber-700' : 'border-stone-200 bg-white text-stone-600 hover:border-amber-300'}`}>
-              {r.label}
-            </button>
-          ))}
-        </div>
-        <div className="flex items-center gap-2">
-          <input
-            type="number"
-            min="50"
-            placeholder="O escribe km personalizados Ej: 15"
-            className="flex-1 px-3 py-2 bg-white border border-stone-300 rounded-lg text-xs font-medium text-stone-700 focus:outline-none focus:ring-2 focus:ring-amber-400/40 focus:border-amber-400"
-            onChange={e => {
-              const val = e.target.value ? Number(e.target.value) * 1000 : null;
-              handleRadioChange(val);
-            }}
-          />
-          <span className="text-xs text-stone-500 font-medium whitespace-nowrap">km</span>
-        </div>
-        {radioSeleccionado && value && (
-          <p className="text-[11px] text-amber-700 font-medium">
-            <i className="ri-circle-line mr-1" />
-            Círculo de {radioSeleccionado >= 1000 ? `${radioSeleccionado/1000} km` : `${radioSeleccionado} m`} dibujado en el mapa
+
+        {drawingPoligono && (
+          <p className="text-[11px] text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-lg px-2.5 py-1.5 font-medium">
+            <i className="ri-cursor-line mr-1" /> Toca el mapa para ir marcando cada esquina de tu chacra, en orden, dando la vuelta al terreno.
           </p>
         )}
-        {!value && radioSeleccionado && (
-          <p className="text-[11px] text-stone-400">Marca primero la ubicación en el mapa para ver el perímetro</p>
+
+        <div className="flex flex-wrap gap-2">
+          <button type="button" onClick={toggleDrawMode}
+            className={`flex-1 py-2 px-3 rounded-lg text-xs font-bold border-2 transition-all flex items-center justify-center gap-1.5 ${drawingPoligono ? 'border-emerald-600 bg-emerald-600 text-white' : 'border-emerald-500 text-emerald-700 bg-white hover:bg-emerald-50'}`}>
+            <i className={drawingPoligono ? 'ri-check-line' : 'ri-pencil-line'} />
+            {drawingPoligono ? 'Terminar de dibujar' : 'Dibujar perímetro'}
+          </button>
+          {drawingPoligono && poligonoPtsUI.length > 0 && (
+            <button type="button" onClick={undoLastPoint}
+              className="py-2 px-3 rounded-lg text-xs font-bold border-2 border-stone-300 bg-white text-stone-600 hover:border-stone-400 transition-all">
+              <i className="ri-arrow-go-back-line mr-1" /> Deshacer punto
+            </button>
+          )}
+        </div>
+
+        {poligonoPtsUI.length > 0 && (
+          <p className="text-[11px] text-emerald-700 font-medium">
+            <i className="ri-shape-line mr-1" />
+            {poligonoPtsUI.length} punto{poligonoPtsUI.length > 1 ? 's' : ''} marcado{poligonoPtsUI.length > 1 ? 's' : ''}
+            {value?.areaPoligonoHa != null && poligonoPtsUI.length >= 3 && (
+              <> · Área aproximada: <strong>{value.areaPoligonoHa.toFixed(2)} ha</strong></>
+            )}
+            {poligonoPtsUI.length > 0 && poligonoPtsUI.length < 3 && ' (marca al menos 3 puntos para calcular el área)'}
+          </p>
         )}
       </div>
     </div>

@@ -568,6 +568,8 @@ export default function Registro() {
         lng_parcela: finalData.parcelaCoords?.lng ?? null,
         altitud_gps: finalData.parcelaCoords?.altitud ?? null,
         perimetro_radio: finalData.parcelaCoords?.perimetroRadio ?? null,
+        poligono_parcela: finalData.parcelaCoords?.poligono ?? null,
+        area_poligono_ha: finalData.parcelaCoords?.areaPoligonoHa ?? null,
         codigo_parcela: finalData.codigoParcela,
         edad_plantas: finalData.edadPlantas || null,
         distanciamiento: finalData.distanciamiento,
@@ -682,7 +684,8 @@ export default function Registro() {
         lng_parcela: finalData.parcelaCoords?.lng ?? null,
         altitud_gps: finalData.parcelaCoords?.altitud ?? null,
         perimetro_radio: finalData.parcelaCoords?.perimetroRadio ?? null,
-        perimetro_radio: finalData.parcelaCoords?.perimetroRadio ?? null,
+        poligono_parcela: finalData.parcelaCoords?.poligono ?? null,
+        area_poligono_ha: finalData.parcelaCoords?.areaPoligonoHa ?? null,
       };
 
       await supabase.functions.invoke("enviar-registro", {
